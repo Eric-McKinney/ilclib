@@ -1,6 +1,7 @@
 - memory allocators (arena, etc.)
 - array list (dynamic size array)
 - binary tree (maybe other trees too)
+- max/min heap
 - hashmap
 - linked list
 - test module
