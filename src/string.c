@@ -67,7 +67,7 @@ size_t string_length(const String *str) {
 }
 
 String *substring(const String *str, int start, int end) {
-    if (str == NULL || start < str->len * -1 || end < str->len * -1) {
+    if (str == NULL || start * -1 >= str->len || end * -1 > str->len) {
         return NULL;
     }
 
@@ -79,7 +79,7 @@ String *substring(const String *str, int start, int end) {
     }
 
     int len = end - start;
-    if (len < 0 || len >= str->len) {
+    if (len > str->len || len * -1 > str->len) {
         return NULL;
     }
 
@@ -87,7 +87,11 @@ String *substring(const String *str, int start, int end) {
     substr->chars = malloc(len * sizeof(char));
     substr->len = len;
 
-    mem_copy(substr->chars, str->chars + start, len);
+    if (len > 0) {
+        mem_copy(substr->chars, str->chars + start, len);
+    } else if (len < 0) {
+        reverse_mem_copy(substr->chars, str->chars + start, len);
+    }
 
     return sub;
 }
