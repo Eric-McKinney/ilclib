@@ -19,7 +19,7 @@ static void reverse_mem_copy(void *dest, void *src, size_t size) {
     }
 }
 
-String *alloc_string(const char *chars, size_t len) {
+String *create_string(const char *chars, size_t len) {
     if (chars == NULL) {
         return NULL;
     }
@@ -37,7 +37,7 @@ String *string_copy(const String *str) {
         return NULL;
     }
 
-    return alloc_string(str->chars, str->len);
+    return create_string(str->chars, str->len);
 }
 
 String *string_reverse(const String *str) {
