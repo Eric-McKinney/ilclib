@@ -12,6 +12,13 @@ static void mem_copy(void *dest, void *src, size_t size) {
     }
 }
 
+static void reverse_mem_copy(void *dest, void *src, size_t size) {
+    int i_dest, i_src;
+    for (i_dest = 0, i_src = size - 1; i_dest < size; i_dest++, i_src--) {
+        dest[i_dest] = src[i_src];
+    }
+}
+
 String *alloc_string(const char *chars, size_t len) {
     if (chars == NULL) {
         return NULL;
@@ -31,6 +38,19 @@ String *string_copy(const String *str) {
     }
 
     return alloc_string(str->chars, str->len);
+}
+
+String *string_reverse(const String *str) {
+    if (str == NULL) {
+        return NULL;
+    }
+
+    String *reverse = malloc(sizeof(String));
+    reverse->chars = malloc(str->len * sizeof(char));
+    reverse_mem_copy(reverse->chars, str->chars, str->len);
+    reverse->len = str->len;
+
+    return reverse;
 }
 
 void free_string(String *str) {
