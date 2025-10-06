@@ -1,21 +1,18 @@
 #include <stdlib.h>
+#include <ilc/string.h>
 
-typedef struct {
-    char *chars;
-    size_t len;
-} String;
 
-static void mem_copy(void *dest, void *src, size_t size) {
-    int i;
+static void mem_copy(void *dest, const void *src, size_t size) {
+    unsigned int i;
     for (i = 0; i < size; i++) {
-        dest[i] = src[i];
+        ((char *)dest)[i] = ((char *)src)[i];
     }
 }
 
-static void reverse_mem_copy(void *dest, void *src, size_t size) {
-    int i_dest, i_src;
+static void reverse_mem_copy(void *dest, const void *src, size_t size) {
+    unsigned int i_dest, i_src;
     for (i_dest = 0, i_src = size - 1; i_dest < size; i_dest++, i_src--) {
-        dest[i_dest] = src[i_src];
+        ((char *)dest)[i_dest] = ((char *)src)[i_src];
     }
 }
 
@@ -26,6 +23,7 @@ String *create_string(const char *chars, size_t len) {
 
     String *str = malloc(sizeof(String));
     str->chars = malloc(len * sizeof(char));
+    str->len = len;
 
     mem_copy(str->chars, chars, len);
 
@@ -67,7 +65,7 @@ size_t string_length(const String *str) {
 }
 
 String *substring(const String *str, int start, int end) {
-    if (str == NULL || start * -1 >= str->len || end * -1 > str->len) {
+    if (str == NULL || (unsigned int) abs(start) >= str->len || (unsigned int) abs(end) > str->len) {
         return NULL;
     }
 
@@ -79,9 +77,6 @@ String *substring(const String *str, int start, int end) {
     }
 
     int len = end - start;
-    if (len > str->len || len * -1 > str->len) {
-        return NULL;
-    }
 
     String *substr = malloc(sizeof(String));
     substr->chars = malloc(len * sizeof(char));
@@ -93,6 +88,6 @@ String *substring(const String *str, int start, int end) {
         reverse_mem_copy(substr->chars, str->chars + start, len);
     }
 
-    return sub;
+    return substr;
 }
 
