@@ -16,18 +16,21 @@ struct _test_suite {
 };
 
 
-void init_test_suite(TestSuite *suite, const char *name) {
-    if (suite == NULL || name == NULL) {
-        return;
+TestSuite *create_test_suite(const char *name) {
+    if (name == NULL) {
+        return NULL;
     }
 
+    TestSuite *suite = malloc(sizeof(TestSuite));
     suite->name = name;  /* name should be a string literal in scope as long as the test suite */
     suite->tests = NULL;
     suite->num_tests = 0;
+
+    return suite;
 }
 
-void destruct_test_suite(TestSuite *suite) {
-    int i;
+void free_test_suite(TestSuite *suite) {
+    unsigned int i;
 
     for (i = 0; i < suite->num_tests; i++) {
         free(suite->tests[i]);
@@ -63,7 +66,7 @@ void suite_add_test(TestSuite *suite, const char *test_name, int (*run)(int)) {
 }
 
 void run_test_suite(const TestSuite *suite, int verbose) {
-    int i, num_passed = 0;
+    unsigned int i, num_passed = 0;
 
     printf("=== " COLOR_TEXT(BLUE_HL, "%s") " ===\n", suite->name);
 
