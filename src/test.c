@@ -1,27 +1,19 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
-
-#define SUCCESS 0
-#define FAILURE 1
-
-#define GREEN "\033[1;32m"
-#define RED "\033[1;31m"
-#define BLUE_HL "\033[44m"
-#define BLUE "\033[0;36m"
-#define END_COLOR "\033[0m"
-#define COLOR_TEXT(color, text) color text END_COLOR
-
+#include <sys/wait.h>
+#include <ilc/test.h>
 
 typedef struct {
-    char *name;
+    const char *name;
     int (*run)(int);
 } Test;
 
-typedef struct TestSuite {
-    char *name;
+struct _test_suite {
+    const char *name;
     Test **tests;
     unsigned int num_tests;
-} TestSuite;
+};
 
 
 void init_test_suite(TestSuite *suite, const char *name) {
@@ -44,9 +36,10 @@ void destruct_test_suite(TestSuite *suite) {
     free(suite->tests);
     suite->tests = NULL;
     suite->num_tests = 0;
+    free(suite);
 }
 
-static Test *create_test(char *name, int (*run)(int)) {
+static Test *create_test(const char *name, int (*run)(int)) {
     if (name == NULL || run == NULL) {
         return NULL;
     }
@@ -57,7 +50,7 @@ static Test *create_test(char *name, int (*run)(int)) {
     return test;
 }
 
-void suite_add_test(TestSuite *suite, char *test_name, int (*run)(int)) {
+void suite_add_test(TestSuite *suite, const char *test_name, int (*run)(int)) {
     suite->num_tests++;
     suite->tests = realloc(suite->tests, suite->num_tests * sizeof(Test *));
 
@@ -78,7 +71,7 @@ void run_test_suite(const TestSuite *suite, int verbose) {
         int test_result;
         pid_t fork_result;
 
-        printf(COLOR_TEXT(BLUE, "%s"), suite->tests[i].name);
+        printf(COLOR_TEXT(BLUE, "%s"), suite->tests[i]->name);
         if (verbose) {
             printf(":\n");
         } else {
@@ -101,13 +94,13 @@ void run_test_suite(const TestSuite *suite, int verbose) {
                 test_result = FAILURE;
             }
         } else {  /* child */
-            test_result = suite->tests[i].run(verbose);
+            test_result = suite->tests[i]->run(verbose);
             exit(test_result);
         }
 
         int test_passed = test_result == SUCCESS ? 1 : 0;
         num_passed += test_passed;
-        char result_text[] = test_passed ? COLOR_TEXT(GREEN, "PASSED") : COLOR_TEXT(RED, "FAILED");
+        const char *result_text = (test_passed ? COLOR_TEXT(GREEN, "PASSED") : COLOR_TEXT(RED, "FAILED"));
 
         if (verbose) {
             printf("Result: %s\n", result_text);
