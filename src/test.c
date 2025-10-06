@@ -114,3 +114,14 @@ void run_test_suite(const TestSuite *suite, int verbose) {
 
     printf("\n" COLOR_TEXT(BLUE_HL, "%s") ": %d of %d tests passed\n", suite->name, num_passed, suite->num_tests);
 }
+
+int check_mem_equal(const void *actual, const void *expected, size_t size) {
+    unsigned int i;
+    for (i = 0; i < size; i++) {
+        if (((char *)actual)[i] != ((char *)expected)[i]) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
