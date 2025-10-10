@@ -40,4 +40,4 @@ $(TEST_BIN):
 	mkdir -p $(TEST_BIN)
 
 clean:
-	rm -rf $(OBJ) $(TEST_BIN)
+	rm -rf $(BIN)
