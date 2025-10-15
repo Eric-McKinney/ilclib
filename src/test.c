@@ -65,7 +65,7 @@ void suite_add_test(TestSuite *suite, const char *test_name, int (*run)(int)) {
     suite->tests[suite->num_tests - 1] = create_test(test_name, run);
 }
 
-void run_test_suite(const TestSuite *suite, int verbose) {
+void run_test_suite(TestSuite *suite, int verbose) {
     unsigned int i, num_passed = 0;
 
     printf("=== " COLOR_TEXT(BLUE_HL, "%s") " ===\n", suite->name);
@@ -98,6 +98,7 @@ void run_test_suite(const TestSuite *suite, int verbose) {
             }
         } else {  /* child */
             test_result = suite->tests[i]->run(verbose);
+            free_test_suite(suite);  /* not strictly necessary, but makes finding real memory leaks easier */
             exit(test_result);
         }
 
