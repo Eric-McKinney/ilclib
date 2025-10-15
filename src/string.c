@@ -60,10 +60,6 @@ void free_string(String *str) {
     free(str);
 }
 
-size_t string_length(const String *str) {
-    return str == NULL ? 0 : str->len;
-}
-
 String *substring(const String *str, int start, int end) {
     if (str == NULL || (unsigned int) abs(start) >= str->len || (unsigned int) abs(end) > str->len) {
         return NULL;
