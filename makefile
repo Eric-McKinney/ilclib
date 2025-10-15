@@ -20,6 +20,7 @@ TESTS=$(patsubst %,$(TEST_BIN)/%,$(_TESTS))
 all: $(OBJ) $(LIB_OBJS)
 
 test: $(OBJ) $(TEST_BIN) $(TESTS)
+	@echo 'Run "export LD_LIBRARY_PATH=./build/obj" to tell linker where to find library .so files'
 
 $(OBJ)/libtest.so: $(SRC)/test.c $(INCLUDE)/ilc/test.h
 	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
