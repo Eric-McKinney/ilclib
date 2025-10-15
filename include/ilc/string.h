@@ -9,7 +9,8 @@ typedef struct {
 } String;
 
 String *create_string(const char *chars, size_t len);
-String *copy_string(const String *str);
+String *string_copy(const String *str);
+String *string_reverse(const String *str);
 void free_string(String *str);
 String *substring(const String *str, int start, int end);
 
