@@ -22,9 +22,19 @@ String *create_string(const char *chars, size_t len) {
     }
 
     String *str = malloc(sizeof(String));
-    str->chars = malloc(len * sizeof(char));
-    str->len = len;
 
+    if (str == NULL) {
+        return NULL;
+    }
+
+    str->chars = malloc(len * sizeof(char));
+
+    if (str->chars == NULL) {
+        free(str);
+        return NULL;
+    }
+
+    str->len = len;
     mem_copy(str->chars, chars, len);
 
     return str;

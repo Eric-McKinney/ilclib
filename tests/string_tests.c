@@ -10,8 +10,6 @@ static int create_string_test_helper(const char *cstr, size_t len, int verbose) 
         return str == NULL;
     }
 
-    assert(str->chars != NULL);
-
     int len_ok = str->len == len;
     int chars_ok = check_mem_equal(str->chars, cstr, len);
 
@@ -51,9 +49,6 @@ static int string_copy_test_helper(const char *cstr, size_t len, int verbose) {
     if (cstr == NULL) {
         return copy == NULL;
     }
-
-    assert(str->chars != NULL);
-    assert(copy->chars != NULL);
 
     int len_same = str->len == copy->len;
     int chars_same = check_mem_equal(str->chars, copy->chars, str->len);
