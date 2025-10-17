@@ -86,10 +86,60 @@ static int string_copy_test(int verbose) {
     return (t1 && t2 && t3 && t4) ? SUCCESS : FAILURE;
 }
 
+static int string_reverse_test_helper(const char *cstr, size_t len, int verbose) {
+    String *str = create_string(cstr, len);
+    String *reverse = string_reverse(str);
+
+    if (cstr == NULL) {
+        return reverse == NULL;
+    }
+
+    int len_same = str->len == reverse->len;
+    int chars_reversed = 1;
+
+    unsigned int i;
+    if (len_same) {
+        for (i = 0; i < str->len; i++) {
+            if (reverse->chars[i] != str->chars[str->len - i - 1]) {
+                chars_reversed = 0;
+                break;
+            }
+        }
+    }
+
+    if (verbose) {
+        printf("    given string: \"%s\", length: %lu\n", cstr, len);
+        if (!len_same) {
+            printf("    " COLOR_TEXT(RED, "reversed string length is different")
+                   " (original length: %lu, reversed length: %lu)\n", str->len, reverse->len);
+            printf("    note: didn't check if string was reversed properly due to length difference\n");
+        }
+        if (!chars_reversed) {
+            printf("    " COLOR_TEXT(RED, "string was not reversed properly")
+                   " (reverse[%u] is %c while original[%lu - %u - 1] is %c)\n", i, reverse->chars[i],
+                   str->len, i, str->chars[str->len - i - 1]);
+        }
+    }
+
+    free_string(str);
+    free_string(reverse);
+
+    return len_same && chars_reversed;
+}
+
+static int string_reverse_test(int verbose) {
+    int t1 = string_reverse_test_helper(NULL, 1, verbose);
+    int t2 = string_reverse_test_helper("", 0, verbose);
+    int t3 = string_reverse_test_helper("abc", 3, verbose);
+
+    return (t1 && t2 && t3) ? SUCCESS : FAILURE;
+}
+
 int main() {
     TestSuite *string_tests = create_test_suite("string tests");
     suite_add_test(string_tests, "create string", create_string_test);
     suite_add_test(string_tests, "copy string", string_copy_test);
+    suite_add_test(string_tests, "reverse string", string_reverse_test);
     run_test_suite(string_tests, 0);
     free_test_suite(string_tests);
 
