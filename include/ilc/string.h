@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 typedef struct {
-    char *chars;
+    char *chars;  /* NOT a c string (no null terminator) */
     size_t len;
 } String;
 
