@@ -20,6 +20,7 @@ static void reverse_mem_copy(void *dest, const void *src, size_t size) {
 
 String *create_string(const char *chars, size_t len) {
     if (chars == NULL) {
+        errno = EFAULT;
         return NULL;
     }
 
