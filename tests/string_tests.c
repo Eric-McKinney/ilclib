@@ -16,17 +16,19 @@ static int create_string_test_properties(const char *cstr, size_t len, int verbo
     int chars_ok = check_mem_equal(str->chars, cstr, len);
 
     if (verbose) {
-        printf("    given string: \"%s\", length: %lu\n", cstr, len);
+        const char *result = len_ok && chars_ok ?
+            COLOR_TEXT(GREEN, "upheld") :
+            COLOR_TEXT(RED, "violated");
+        printf("    properties %s (given string: \"%s\", length: %lu)\n", result, cstr, len);
         if (!len_ok) {
-            printf("    " COLOR_TEXT(RED, "lengths differ") " (expected %lu, actual %lu)\n", len, str->len);
+            printf("        " COLOR_TEXT(RED, "lengths differ")
+                   " (expected %lu, actual %lu)\n", len, str->len);
         }
         if (!chars_ok) {
-            printf("    " COLOR_TEXT(RED, "chars differ") "\n");
+            printf("        " COLOR_TEXT(RED, "chars differ") " (actual chars: \"");
+            string_print(str);
+            printf("\")\n");
         }
-        if (len_ok && chars_ok) {
-            printf("    test " COLOR_TEXT(GREEN, "passed") "\n");
-        }
-        printf("\n");
     }
 
     free_string(str);
@@ -47,19 +49,24 @@ static int string_copy_test_properties(const char *cstr, size_t len, int verbose
     int memory_location_different = str != copy && str->chars != copy->chars;
 
     if (verbose) {
-        printf("   given string: \"%s\", length: %lu\n", cstr, len);
+        const char *result = len_same && chars_same && memory_location_different ?
+            COLOR_TEXT(GREEN, "upheld") :
+            COLOR_TEXT(RED, "violated");
+        printf("   properties %s (given string: \"%s\", length: %lu)\n", result, cstr, len);
         if (!len_same) {
             printf(
-                "    " COLOR_TEXT(RED, "copy's length is different") "(copy's length: %lu, orignal length: %lu)\n",
-                copy->len,
-                len
+                "        " COLOR_TEXT(RED, "copy's length is different")
+                "(copy's length: %lu, orignal length: %lu)\n",
+                copy->len, len
             );
         }
         if (!chars_same) {
-            printf("    " COLOR_TEXT(RED, "copy's chars are different") "\n");
+            printf("        " COLOR_TEXT(RED, "copy's chars are different") " (copy's chars: \"");
+            string_print(copy);
+            printf("\")\n");
         }
         if (!memory_location_different) {
-            printf("    " COLOR_TEXT(RED, "copy shares same memory address as original") "\n");
+            printf("        " COLOR_TEXT(RED, "copy shares same memory address as original") "\n");
         }
     }
 
@@ -91,16 +98,20 @@ static int string_reverse_test_properties(const char *cstr, size_t len, int verb
     }
 
     if (verbose) {
-        printf("    given string: \"%s\", length: %lu\n", cstr, len);
+        const char *result = len_same && chars_reversed ?
+            COLOR_TEXT(GREEN, "upheld") :
+            COLOR_TEXT(RED, "violated");
+        printf("    properties %s (given string: \"%s\", length: %lu)\n", result, cstr, len);
         if (!len_same) {
-            printf("    " COLOR_TEXT(RED, "reversed string length is different")
+            printf("        " COLOR_TEXT(RED, "reversed string length is different")
                    " (original length: %lu, reversed length: %lu)\n", str->len, reverse->len);
             printf("    note: didn't check if string was reversed properly due to length difference\n");
         }
         if (!chars_reversed) {
-            printf("    " COLOR_TEXT(RED, "string was not reversed properly")
-                   " (reverse[%u] is %c while original[%lu - %u - 1] is %c)\n", i, reverse->chars[i],
-                   str->len, i, str->chars[str->len - i - 1]);
+            printf("        " COLOR_TEXT(RED, "string was not reversed properly")
+                   " (reverse's chars: \"");
+            string_print(reverse);
+            printf("\")\n");
         }
     }
 
@@ -124,8 +135,17 @@ static int string_reverse_test_examples(const char *cstr, const char *cstr_rever
 
     int expectation_met = string_equal(expected_reverse, reverse);
 
-    if (verbose && !expectation_met) {
-        printf("    " COLOR_TEXT(RED, "string_reverse(\"%s\") != \"%s\"") "\n", cstr, cstr_reverse);
+    if (verbose) {
+        const char *result = expectation_met ?
+            COLOR_TEXT(GREEN, "ok") :
+            COLOR_TEXT(RED, "not ok");
+        printf("    example %s (given: \"%s\", expected: \"%s\", given len: %lu)\n",
+               result, cstr, cstr_reverse, len);
+        if (!expectation_met) {
+            printf("        string_reverse(\"%s\") => \"", cstr);
+            string_print(reverse);
+            printf("\" != \"%s\"\n", cstr_reverse);
+        }
     }
 
     free_string(str);
