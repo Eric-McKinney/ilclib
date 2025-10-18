@@ -127,12 +127,40 @@ static int string_reverse_test_properties(const char *cstr, size_t len, int verb
     return len_same && chars_reversed;
 }
 
+static int string_reverse_test_examples(const char *cstr, const char *cstr_reverse, size_t len, int verbose) {
+    String *str = create_string(cstr, len);
+    String *expected_reverse = create_string(cstr_reverse, len);
+
+    /* not the point of this function (and NULL case already tested in properties) */
+    assert(cstr != NULL && cstr_reverse != NULL);
+
+    String *reverse = string_reverse(str);
+
+    /* test is meaningless if strings can't be created */
+    assert(str != NULL && expected_reverse != NULL && reverse != NULL);
+
+    int expectation_met = string_equal(expected_reverse, reverse);
+
+    if (verbose && !expectation_met) {
+        printf("    " COLOR_TEXT(RED, "string_reverse(\"%s\") != \"%s\"") "\n", cstr, cstr_reverse);
+    }
+
+    free_string(str);
+    free_string(expected_reverse);
+    free_string(reverse);
+
+    return expectation_met;
+}
+
 static int string_reverse_test(int verbose) {
     int t1 = string_reverse_test_properties(NULL, 1, verbose);
     int t2 = string_reverse_test_properties("", 0, verbose);
     int t3 = string_reverse_test_properties("abc", 3, verbose);
 
-    return (t1 && t2 && t3) ? SUCCESS : FAILURE;
+    int t4 = string_reverse_test_examples("abc", "cba", 3, verbose);
+    int t5 = string_reverse_test_examples("another day", "yad rehtona", 11, verbose);
+
+    return (t1 && t2 && t3 && t4 && t5) ? SUCCESS : FAILURE;
 }
 
 int main() {
