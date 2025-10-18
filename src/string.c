@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <errno.h>
 #include <ilc/string.h>
 
 
@@ -24,12 +25,14 @@ String *create_string(const char *chars, size_t len) {
     String *str = malloc(sizeof(String));
 
     if (str == NULL) {
+        errno = ENOMEM;
         return NULL;
     }
 
     str->chars = malloc(len * sizeof(char));
 
     if (str->chars == NULL) {
+        errno = ENOMEM;
         free(str);
         return NULL;
     }
@@ -42,6 +45,7 @@ String *create_string(const char *chars, size_t len) {
 
 String *string_copy(const String *str) {
     if (str == NULL) {
+        errno = EFAULT;
         return NULL;
     }
 
@@ -50,11 +54,25 @@ String *string_copy(const String *str) {
 
 String *string_reverse(const String *str) {
     if (str == NULL) {
+        errno = EFAULT;
         return NULL;
     }
 
     String *reverse = malloc(sizeof(String));
+
+    if (reverse == NULL) {
+        errno = ENOMEM;
+        return NULL;
+    }
+
     reverse->chars = malloc(str->len * sizeof(char));
+
+    if (reverse->chars == NULL) {
+        errno = ENOMEM;
+        free(reverse);
+        return NULL;
+    }
+
     reverse_mem_copy(reverse->chars, str->chars, str->len);
     reverse->len = str->len;
 
@@ -71,7 +89,13 @@ void free_string(String *str) {
 }
 
 String *substring(const String *str, int start, int end) {
-    if (str == NULL || (unsigned int) abs(start) >= str->len || (unsigned int) abs(end) > str->len) {
+    if (str == NULL) {
+        errno = EFAULT;
+        return NULL;
+    }
+
+    if ((unsigned int) abs(start) >= str->len || (unsigned int) abs(end) > str->len) {
+        errno = EDOM;
         return NULL;
     }
 
@@ -85,7 +109,20 @@ String *substring(const String *str, int start, int end) {
     int len = end - start;
 
     String *substr = malloc(sizeof(String));
+
+    if (substr == NULL) {
+        errno = ENOMEM;
+        return NULL;
+    }
+
     substr->chars = malloc(len * sizeof(char));
+
+    if (substr->chars == NULL) {
+        errno = ENOMEM;
+        free(substr);
+        return NULL;
+    }
+
     substr->len = len;
 
     if (len > 0) {
