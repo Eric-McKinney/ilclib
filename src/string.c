@@ -134,3 +134,70 @@ String *substring(const String *str, int start, int end) {
     return substr;
 }
 
+char *string_to_c_string(const String *str) {
+    if (str == NULL) {
+        errno = EFAULT;
+        return NULL;
+    }
+
+    char *cstr = malloc(str->len + 1);
+
+    if (cstr == NULL) {
+        errno = ENOMEM;
+        return NULL;
+    }
+
+    mem_copy(cstr, str->chars, str->len);
+    cstr[str->len] = '\0';
+
+    return cstr;
+}
+
+int string_equal(const String *str1, const String *str2) {
+    /* NULL is not considered a string, so can't be equal to a string or even another NULL */
+    if (str1 == NULL || str2 == NULL) {
+        errno = EFAULT;  /* while NULL has a defined behavior here, it is still an error */
+        return 0;
+    }
+
+    if (str1->len != str2->len) {
+        return 0;
+    }
+
+    unsigned int i;
+    for (i = 0; i < str1->len; i++) {
+        if (str1->chars[i] != str2->chars[i]) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+int string_compare(const String *str1, const String *str2) {
+    /* undefined behavior (other than setting errno) */
+    if (str1 == NULL || str2 == NULL) {
+        errno = EFAULT;
+        return -1;  /* arbitrary */
+    }
+
+    size_t shortest_len = str1->len < str2->len ? str1->len : str2->len;
+
+    size_t i;
+    for (i = 0; i < shortest_len; i++) {
+        int diff = str1->chars[i] - str2->chars[i];
+        if (diff != 0) {
+            return diff;
+        }
+    }
+
+    /* a longer string is "bigger" e.g. abc - abcd < 0 */
+    if (shortest_len == str1->len) {
+        return -1;
+    } else {
+        return 1;
+    }
+
+    return 0;
+}
+

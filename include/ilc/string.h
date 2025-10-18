@@ -13,5 +13,8 @@ String *string_copy(const String *str);
 String *string_reverse(const String *str);
 void free_string(String *str);
 String *substring(const String *str, int start, int end);
+char *string_to_c_string(const String *str);
+int string_equal(const String *str1, const String *str2);
+int string_compare(const String *str1, const String *str2);
 
 #endif
