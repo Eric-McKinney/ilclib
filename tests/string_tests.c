@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include <ilc/string.h>
 #include <ilc/test.h>
 
@@ -163,12 +165,36 @@ static int string_reverse_test(int verbose) {
     return (t1 && t2 && t3 && t4 && t5) ? SUCCESS : FAILURE;
 }
 
-int main() {
+int main(int argc, char **argv) {
+    int verbose = 0;
+
+    if (argc == 2) {
+        if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--verbose") == 0) {
+            verbose = 1;
+        } else if (strcmp(argv[1], "--help") == 0) {
+            printf(
+                "Usage: %s [-v|--verbose|--help]\n"
+                "    -v, --verbose\n"
+                "        Show more details about each test\n"
+                "    --help\n"
+                "        Print this help message and exit\n",
+                argv[0]
+            );
+            exit(EXIT_SUCCESS);
+        } else {
+            fprintf(stderr, "%s: Invalid argument \"%s\"\n", argv[0], argv[1]);
+            exit(EXIT_FAILURE);
+        }
+    } else if (argc > 2) {
+        fprintf(stderr, "%s: Too many arguments\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
     TestSuite *string_tests = create_test_suite("string tests");
     suite_add_test(string_tests, "create string", create_string_test);
     suite_add_test(string_tests, "copy string", string_copy_test);
     suite_add_test(string_tests, "reverse string", string_reverse_test);
-    run_test_suite(string_tests, 0);
+    run_test_suite(string_tests, verbose);
     free_test_suite(string_tests);
 
     return 0;
