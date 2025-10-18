@@ -1,15 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <assert.h>
 #include <string.h>
 #include <ilc/string.h>
 #include <ilc/test.h>
 
+
 static int create_string_test_properties(const char *cstr, size_t len, int verbose) {
     String *str = create_string(cstr, len);
 
     if (cstr == NULL) {
-        return str == NULL;
+        int ret_val_ok = str == NULL;
+        int errno_val = errno;
+        int errno_ok = errno == EFAULT;
+
+        if (verbose) {
+            const char *result = ret_val_ok && errno_ok ?
+                COLOR_TEXT(GREEN, "upheld") :
+                COLOR_TEXT(RED, "violated");
+            printf("    properties %s (given NULL, length: %lu)\n", result, len);
+            if (!ret_val_ok) {
+                printf("        " COLOR_TEXT(RED, "return value != NULL") "\n");
+            }
+            if (!errno_ok) {
+                printf("        " COLOR_TEXT(RED, "errno not set properly") " (errno = %d)\n",
+                       errno_val);
+            }
+        }
+
+        return ret_val_ok && errno_ok;
     }
 
     int len_ok = str->len == len;
@@ -41,7 +61,25 @@ static int string_copy_test_properties(const char *cstr, size_t len, int verbose
     String *copy = string_copy(str);
 
     if (cstr == NULL) {
-        return copy == NULL;
+        int ret_val_ok = copy == NULL;
+        int errno_val = errno;
+        int errno_ok = errno == EFAULT;
+
+        if (verbose) {
+            const char *result = ret_val_ok && errno_ok ?
+                COLOR_TEXT(GREEN, "upheld") :
+                COLOR_TEXT(RED, "violated");
+            printf("    properties %s (given NULL, length: %lu)\n", result, len);
+            if (!ret_val_ok) {
+                printf("        " COLOR_TEXT(RED, "return value != NULL") "\n");
+            }
+            if (!errno_ok) {
+                printf("        " COLOR_TEXT(RED, "errno not set properly") " (errno = %d)\n",
+                       errno_val);
+            }
+        }
+
+        return ret_val_ok && errno_ok;
     }
 
     int len_same = str->len == copy->len;
@@ -81,7 +119,25 @@ static int string_reverse_test_properties(const char *cstr, size_t len, int verb
     String *reverse = string_reverse(str);
 
     if (cstr == NULL) {
-        return reverse == NULL;
+        int ret_val_ok = reverse == NULL;
+        int errno_val = errno;
+        int errno_ok = errno == EFAULT;
+
+        if (verbose) {
+            const char *result = ret_val_ok && errno_ok ?
+                COLOR_TEXT(GREEN, "upheld") :
+                COLOR_TEXT(RED, "violated");
+            printf("    properties %s (given NULL, length: %lu)\n", result, len);
+            if (!ret_val_ok) {
+                printf("        " COLOR_TEXT(RED, "return value != NULL") "\n");
+            }
+            if (!errno_ok) {
+                printf("        " COLOR_TEXT(RED, "errno not set properly") " (errno = %d)\n",
+                       errno_val);
+            }
+        }
+
+        return ret_val_ok && errno_ok;
     }
 
     int len_same = str->len == reverse->len;
