@@ -3,7 +3,7 @@
 #include <ilc/string.h>
 #include <ilc/test.h>
 
-static int create_string_test_helper(const char *cstr, size_t len, int verbose) {
+static int create_string_test_properties(const char *cstr, size_t len, int verbose) {
     String *str = create_string(cstr, len);
 
     if (cstr == NULL) {
@@ -33,16 +33,16 @@ static int create_string_test_helper(const char *cstr, size_t len, int verbose) 
 }
 
 static int create_string_test(int verbose) {
-    int t1 = create_string_test_helper(NULL, 1, verbose);
-    int t2 = create_string_test_helper("", 0, verbose);
-    int t3 = create_string_test_helper("I <3 C", 6, verbose);
-    int t4 = create_string_test_helper("123456789", 9, verbose);
-    int t5 = create_string_test_helper("shorter", 5, verbose);
+    int t1 = create_string_test_properties(NULL, 1, verbose);
+    int t2 = create_string_test_properties("", 0, verbose);
+    int t3 = create_string_test_properties("I <3 C", 6, verbose);
+    int t4 = create_string_test_properties("123456789", 9, verbose);
+    int t5 = create_string_test_properties("shorter", 5, verbose);
 
     return (t1 && t2 && t3 && t4 && t5) ? SUCCESS : FAILURE;
 }
 
-static int string_copy_test_helper(const char *cstr, size_t len, int verbose) {
+static int string_copy_test_properties(const char *cstr, size_t len, int verbose) {
     String *str = create_string(cstr, len);
     String *copy = string_copy(str);
 
@@ -78,15 +78,15 @@ static int string_copy_test_helper(const char *cstr, size_t len, int verbose) {
 }
 
 static int string_copy_test(int verbose) {
-    int t1 = string_copy_test_helper(NULL, 1, verbose);
-    int t2 = string_copy_test_helper("", 0, verbose);
-    int t3 = string_copy_test_helper("I <3 C", 6, verbose);
-    int t4 = string_copy_test_helper("should be simple", 16, verbose);
+    int t1 = string_copy_test_properties(NULL, 1, verbose);
+    int t2 = string_copy_test_properties("", 0, verbose);
+    int t3 = string_copy_test_properties("I <3 C", 6, verbose);
+    int t4 = string_copy_test_properties("should be simple", 16, verbose);
 
     return (t1 && t2 && t3 && t4) ? SUCCESS : FAILURE;
 }
 
-static int string_reverse_test_helper(const char *cstr, size_t len, int verbose) {
+static int string_reverse_test_properties(const char *cstr, size_t len, int verbose) {
     String *str = create_string(cstr, len);
     String *reverse = string_reverse(str);
 
@@ -128,9 +128,9 @@ static int string_reverse_test_helper(const char *cstr, size_t len, int verbose)
 }
 
 static int string_reverse_test(int verbose) {
-    int t1 = string_reverse_test_helper(NULL, 1, verbose);
-    int t2 = string_reverse_test_helper("", 0, verbose);
-    int t3 = string_reverse_test_helper("abc", 3, verbose);
+    int t1 = string_reverse_test_properties(NULL, 1, verbose);
+    int t2 = string_reverse_test_properties("", 0, verbose);
+    int t3 = string_reverse_test_properties("abc", 3, verbose);
 
     return (t1 && t2 && t3) ? SUCCESS : FAILURE;
 }
