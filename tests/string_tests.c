@@ -34,16 +34,6 @@ static int create_string_test_properties(const char *cstr, size_t len, int verbo
     return len_ok && chars_ok;
 }
 
-static int create_string_test(int verbose) {
-    int t1 = create_string_test_properties(NULL, 1, verbose);
-    int t2 = create_string_test_properties("", 0, verbose);
-    int t3 = create_string_test_properties("I <3 C", 6, verbose);
-    int t4 = create_string_test_properties("123456789", 9, verbose);
-    int t5 = create_string_test_properties("shorter", 5, verbose);
-
-    return (t1 && t2 && t3 && t4 && t5) ? SUCCESS : FAILURE;
-}
-
 static int string_copy_test_properties(const char *cstr, size_t len, int verbose) {
     String *str = create_string(cstr, len);
     String *copy = string_copy(str);
@@ -77,15 +67,6 @@ static int string_copy_test_properties(const char *cstr, size_t len, int verbose
     free_string(copy);
 
     return len_same && chars_same && memory_location_different;
-}
-
-static int string_copy_test(int verbose) {
-    int t1 = string_copy_test_properties(NULL, 1, verbose);
-    int t2 = string_copy_test_properties("", 0, verbose);
-    int t3 = string_copy_test_properties("I <3 C", 6, verbose);
-    int t4 = string_copy_test_properties("should be simple", 16, verbose);
-
-    return (t1 && t2 && t3 && t4) ? SUCCESS : FAILURE;
 }
 
 static int string_reverse_test_properties(const char *cstr, size_t len, int verbose) {
@@ -154,15 +135,67 @@ static int string_reverse_test_examples(const char *cstr, const char *cstr_rever
     return expectation_met;
 }
 
+static int string_copy_test(int verbose) {
+    int test_results[] = {
+        string_copy_test_properties(NULL, 1, verbose),
+        string_copy_test_properties("", 0, verbose),
+        string_copy_test_properties("I <3 C", 6, verbose),
+        string_copy_test_properties("should be simple", 16, verbose),
+    };
+
+    int num_tests = sizeof(test_results) / sizeof(int);
+    int final_result = 1;
+    int i;
+    for (i = 0; i < num_tests; i++) {
+        final_result = final_result && test_results[i];
+    }
+
+    return final_result ? SUCCESS : FAILURE;
+}
+
+static int create_string_test(int verbose) {
+    int test_results[] = {
+        create_string_test_properties(NULL, 1, verbose),
+        create_string_test_properties("", 0, verbose),
+        create_string_test_properties("I <3 C", 6, verbose),
+        create_string_test_properties("123456789", 9, verbose),
+        create_string_test_properties("shorter", 5, verbose),
+    };
+
+    int num_tests = sizeof(test_results) / sizeof(int);
+    int final_result = 1;
+    int i;
+    for (i = 0; i < num_tests; i++) {
+        final_result = final_result && test_results[i];
+    }
+
+    return final_result ? SUCCESS : FAILURE;
+}
+
 static int string_reverse_test(int verbose) {
-    int t1 = string_reverse_test_properties(NULL, 1, verbose);
-    int t2 = string_reverse_test_properties("", 0, verbose);
-    int t3 = string_reverse_test_properties("abc", 3, verbose);
+    int test_results[] = {
+        string_reverse_test_properties(NULL, 1, verbose),
+        string_reverse_test_properties("", 0, verbose),
+        string_reverse_test_properties("abc", 3, verbose),
+        string_reverse_test_properties("another day", 11, verbose),
+        string_reverse_test_properties("even", 4, verbose),
+        string_reverse_test_properties("123456789123456789123456789", 27, verbose),
 
-    int t4 = string_reverse_test_examples("abc", "cba", 3, verbose);
-    int t5 = string_reverse_test_examples("another day", "yad rehtona", 11, verbose);
+        string_reverse_test_examples("", "", 0, verbose),
+        string_reverse_test_examples("abc", "cba", 3, verbose),
+        string_reverse_test_examples("another day", "yad rehtona", 11, verbose),
+        string_reverse_test_examples("even", "neve", 4, verbose),
+        string_reverse_test_examples("123456789123456789123456789", "987654321987654321987654321", 27, verbose),
+    };
 
-    return (t1 && t2 && t3 && t4 && t5) ? SUCCESS : FAILURE;
+    int num_tests = sizeof(test_results) / sizeof(int);
+    int final_result = 1;
+    int i;
+    for (i = 0; i < num_tests; i++) {
+        final_result = final_result && test_results[i];
+    }
+
+    return final_result ? SUCCESS : FAILURE;
 }
 
 int main(int argc, char **argv) {
