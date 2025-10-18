@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <errno.h>
 #include <ilc/string.h>
 
@@ -201,3 +202,14 @@ int string_compare(const String *str1, const String *str2) {
     return 0;
 }
 
+void string_print(const String *str) {
+    if (str == NULL) {
+        errno = EFAULT;
+        return;
+    }
+
+    size_t i;
+    for (i = 0; i < str->len; i++) {
+        printf("%c", str->chars[i]);
+    }
+}
