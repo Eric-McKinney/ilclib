@@ -74,6 +74,9 @@ void run_test_suite(TestSuite *suite, int verbose) {
         int test_result;
         pid_t fork_result;
 
+        if (verbose) {
+            printf("\n");
+        }
         printf(COLOR_TEXT(BLUE, "%s"), suite->tests[i]->name);
         if (verbose) {
             printf(":\n");
