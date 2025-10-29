@@ -34,8 +34,8 @@ String *create_string(const char *chars, size_t len) {
     str->chars = malloc(len * sizeof(char));
 
     if (str->chars == NULL) {
-        errno = ENOMEM;
         free(str);
+        errno = ENOMEM;
         return NULL;
     }
 
@@ -70,8 +70,8 @@ String *string_reverse(const String *str) {
     reverse->chars = malloc(str->len * sizeof(char));
 
     if (reverse->chars == NULL) {
-        errno = ENOMEM;
         free(reverse);
+        errno = ENOMEM;
         return NULL;
     }
 
@@ -126,8 +126,8 @@ String *substring(const String *str, long start, long end) {
     substr->chars = malloc(len * sizeof(char));
 
     if (substr->chars == NULL) {
-        errno = ENOMEM;
         free(substr);
+        errno = ENOMEM;
         return NULL;
     }
 
