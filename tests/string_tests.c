@@ -7,7 +7,7 @@
 #include <ilc/test.h>
 
 
-static int check_null_property_upheld(const char *ret_val, int errno_val) {
+static int check_null_property_upheld(const String *ret_val, int errno_val, size_t len, int verbose) {
     int ret_val_ok = ret_val == NULL;
     int errno_ok = errno_val == EFAULT;
 
@@ -32,7 +32,7 @@ static int create_string_test_properties(const char *cstr, size_t len, int verbo
     String *str = create_string(cstr, len);
 
     if (cstr == NULL) {
-        return check_null_property_upheld(str, errno);
+        return check_null_property_upheld(str, errno, len, verbose);
     }
 
     int len_ok = str->len == len;
@@ -64,7 +64,7 @@ static int string_copy_test_properties(const char *cstr, size_t len, int verbose
     String *copy = string_copy(str);
 
     if (cstr == NULL) {
-        return check_null_property_upheld(str, errno);
+        return check_null_property_upheld(str, errno, len, verbose);
     }
 
     int len_same = str->len == copy->len;
@@ -104,7 +104,7 @@ static int string_reverse_test_properties(const char *cstr, size_t len, int verb
     String *reverse = string_reverse(str);
 
     if (cstr == NULL) {
-        return check_null_property_upheld(str, errno);
+        return check_null_property_upheld(str, errno, len, verbose);
     }
 
     int len_same = str->len == reverse->len;
