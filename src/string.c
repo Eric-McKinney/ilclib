@@ -5,14 +5,14 @@
 
 
 static void mem_copy(void *dest, const void *src, size_t size) {
-    unsigned int i;
+    size_t i;
     for (i = 0; i < size; i++) {
         ((char *)dest)[i] = ((char *)src)[i];
     }
 }
 
 static void reverse_mem_copy(void *dest, const void *src, size_t size) {
-    unsigned int i_dest, i_src;
+    size_t i_dest, i_src;
     for (i_dest = 0, i_src = size - 1; i_dest < size; i_dest++, i_src--) {
         ((char *)dest)[i_dest] = ((char *)src)[i_src];
     }
@@ -166,7 +166,7 @@ int string_equal(const String *str1, const String *str2) {
         return 0;
     }
 
-    unsigned int i;
+    size_t i;
     for (i = 0; i < str1->len; i++) {
         if (str1->chars[i] != str2->chars[i]) {
             return 0;

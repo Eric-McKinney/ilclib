@@ -143,7 +143,7 @@ static int string_reverse_test_properties(const char *cstr, size_t len, int verb
     int len_same = str->len == reverse->len;
     int chars_reversed = 1;
 
-    unsigned int i;
+    size_t i;
     if (len_same) {
         for (i = 0; i < str->len; i++) {
             if (reverse->chars[i] != str->chars[str->len - i - 1]) {
