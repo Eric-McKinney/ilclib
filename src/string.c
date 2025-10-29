@@ -90,13 +90,14 @@ void free_string(String *str) {
     free(str);
 }
 
-String *substring(const String *str, int start, int end) {
+String *substring(const String *str, long start, long end) {
     if (str == NULL) {
         errno = EFAULT;
         return NULL;
     }
 
-    if ((unsigned int) abs(start) >= str->len || (unsigned int) abs(end) > str->len) {
+    if (start == str->len || (unsigned long) labs(start) > str->len
+                          || (unsigned long) labs(end) > str->len) {
         errno = EDOM;
         return NULL;
     }
@@ -108,7 +109,12 @@ String *substring(const String *str, int start, int end) {
         end = str->len + end;
     }
 
-    int len = end - start;
+    if (start > end) {
+        errno = EINVAL;
+        return NULL;
+    }
+
+    size_t len = (size_t) (end - start);
 
     String *substr = malloc(sizeof(String));
 
@@ -126,12 +132,7 @@ String *substring(const String *str, int start, int end) {
     }
 
     substr->len = len;
-
-    if (len > 0) {
-        mem_copy(substr->chars, str->chars + start, len);
-    } else if (len < 0) {
-        reverse_mem_copy(substr->chars, str->chars + start, len);
-    }
+    mem_copy(substr->chars, str->chars + start, len);
 
     return substr;
 }
