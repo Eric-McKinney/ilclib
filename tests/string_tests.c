@@ -145,12 +145,11 @@ static int string_reverse_test_properties(const char *cstr, size_t len, int verb
 }
 
 static int string_reverse_test_examples(const char *cstr, const char *cstr_reverse, size_t len, int verbose) {
-    String *str = create_string(cstr, len);
-    String *expected_reverse = create_string(cstr_reverse, len);
-
     /* not the point of this function (and NULL case already tested in properties) */
     assert(cstr != NULL && cstr_reverse != NULL);
 
+    String *str = create_string(cstr, len);
+    String *expected_reverse = create_string(cstr_reverse, len);
     String *reverse = string_reverse(str);
 
     /* test is meaningless if strings can't be created */
