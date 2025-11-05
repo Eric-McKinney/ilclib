@@ -10,3 +10,4 @@
 - linked list
   - singly and doubly linked
   - implement higher order functions like sort, map, fold, and filter
+- logging maybe
