@@ -7,11 +7,14 @@
 #include <ilc/test.h>
 
 
-static int check_null_property_upheld(const String *ret_val, int errno_val, size_t len, int verbose) {
+int VERBOSE = 0;
+
+
+static int check_null_property_upheld(const String *ret_val, int errno_val, size_t len) {
     int ret_val_ok = ret_val == NULL;
     int errno_ok = errno_val == EFAULT;
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = ret_val_ok && errno_ok ?
             COLOR_TEXT(GREEN, "upheld") :
             COLOR_TEXT(RED, "violated");
@@ -28,17 +31,17 @@ static int check_null_property_upheld(const String *ret_val, int errno_val, size
     return ret_val_ok && errno_ok;
 }
 
-static int create_string_test_properties(const char *cstr, size_t len, int verbose) {
+static int create_string_test_properties(const char *cstr, size_t len) {
     String *str = create_string(cstr, len);
 
     if (cstr == NULL) {
-        return check_null_property_upheld(str, errno, len, verbose);
+        return check_null_property_upheld(str, errno, len);
     }
 
     int len_ok = str->len == len;
     int chars_ok = check_mem_equal(str->chars, cstr, len);
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = len_ok && chars_ok ?
             COLOR_TEXT(GREEN, "upheld") :
             COLOR_TEXT(RED, "violated");
@@ -59,19 +62,19 @@ static int create_string_test_properties(const char *cstr, size_t len, int verbo
     return len_ok && chars_ok;
 }
 
-static int string_copy_test_properties(const char *cstr, size_t len, int verbose) {
+static int string_copy_test_properties(const char *cstr, size_t len) {
     String *str = create_string(cstr, len);
     String *copy = string_copy(str);
 
     if (cstr == NULL) {
-        return check_null_property_upheld(str, errno, len, verbose);
+        return check_null_property_upheld(str, errno, len);
     }
 
     int len_same = str->len == copy->len;
     int chars_same = check_mem_equal(str->chars, copy->chars, str->len);
     int memory_location_different = str != copy && str->chars != copy->chars;
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = len_same && chars_same && memory_location_different ?
             COLOR_TEXT(GREEN, "upheld") :
             COLOR_TEXT(RED, "violated");
@@ -99,12 +102,12 @@ static int string_copy_test_properties(const char *cstr, size_t len, int verbose
     return len_same && chars_same && memory_location_different;
 }
 
-static int string_reverse_test_properties(const char *cstr, size_t len, int verbose) {
+static int string_reverse_test_properties(const char *cstr, size_t len) {
     String *str = create_string(cstr, len);
     String *reverse = string_reverse(str);
 
     if (cstr == NULL) {
-        return check_null_property_upheld(str, errno, len, verbose);
+        return check_null_property_upheld(str, errno, len);
     }
 
     int len_same = str->len == reverse->len;
@@ -120,7 +123,7 @@ static int string_reverse_test_properties(const char *cstr, size_t len, int verb
         }
     }
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = len_same && chars_reversed ?
             COLOR_TEXT(GREEN, "upheld") :
             COLOR_TEXT(RED, "violated");
@@ -144,7 +147,7 @@ static int string_reverse_test_properties(const char *cstr, size_t len, int verb
     return len_same && chars_reversed;
 }
 
-static int string_reverse_test_examples(const char *cstr, const char *cstr_reverse, size_t len, int verbose) {
+static int string_reverse_test_examples(const char *cstr, const char *cstr_reverse, size_t len) {
     /* not the point of this function (and NULL case already tested in properties) */
     assert(cstr != NULL && cstr_reverse != NULL);
 
@@ -157,7 +160,7 @@ static int string_reverse_test_examples(const char *cstr, const char *cstr_rever
 
     int expectation_met = string_equal(expected_reverse, reverse);
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = expectation_met ?
             COLOR_TEXT(GREEN, "ok") :
             COLOR_TEXT(RED, "not ok");
@@ -177,7 +180,7 @@ static int string_reverse_test_examples(const char *cstr, const char *cstr_rever
     return expectation_met;
 }
 
-static int substring_invalid_range_prop(const String *str, size_t len, int verbose) {
+static int substring_invalid_range_prop(const String *str, size_t len) {
     /* if start > end, substr = NULL and errno = EINVAL */
     String *substr;
     int prop_upheld = 1;
@@ -192,7 +195,7 @@ static int substring_invalid_range_prop(const String *str, size_t len, int verbo
         prop_upheld = prop_upheld && substr == NULL && errno == EINVAL;
     }
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = prop_upheld ?
             COLOR_TEXT(GREEN, "upheld") :
             COLOR_TEXT(RED, "violated");
@@ -202,7 +205,7 @@ static int substring_invalid_range_prop(const String *str, size_t len, int verbo
     return prop_upheld;
 }
 
-static int substring_oob_prop(const String *str, int verbose) {
+static int substring_oob_prop(const String *str) {
     /* if start or end are out of bounds, substr = NULL and errno = EDOM */
     String *substr;
     long i;
@@ -236,7 +239,7 @@ static int substring_oob_prop(const String *str, int verbose) {
         prop_upheld = prop_upheld && substr == NULL && errno == EDOM;
     }
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = prop_upheld ?
             COLOR_TEXT(GREEN, "upheld") :
             COLOR_TEXT(RED, "violated");
@@ -246,7 +249,7 @@ static int substring_oob_prop(const String *str, int verbose) {
     return prop_upheld;
 }
 
-static int substring_empty_str_prop(const String *str, int verbose) {
+static int substring_empty_str_prop(const String *str) {
     /* if start == end and start, end >= 0, substr should always return empty string */
     String *substr;
     size_t i;
@@ -258,7 +261,7 @@ static int substring_empty_str_prop(const String *str, int verbose) {
         free_string(substr);
     }
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = prop_upheld ?
             COLOR_TEXT(GREEN, "upheld") :
             COLOR_TEXT(RED, "violated");
@@ -268,7 +271,7 @@ static int substring_empty_str_prop(const String *str, int verbose) {
     return prop_upheld;
 }
 
-static int substring_char_at_prop(const String *str, int verbose) {
+static int substring_char_at_prop(const String *str) {
     /* substring(i, i+1) yields str->chars[i] for i in [0, str->len) */
     /* substring(i, i) yields str->chars[str->len + i] for i in [-str->len, -1]*/
     String *substr;
@@ -290,7 +293,7 @@ static int substring_char_at_prop(const String *str, int verbose) {
         free_string(substr);
     }
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = prop_upheld ?
             COLOR_TEXT(GREEN, "upheld") :
             COLOR_TEXT(RED, "violated");
@@ -300,7 +303,7 @@ static int substring_char_at_prop(const String *str, int verbose) {
     return prop_upheld;
 }
 
-static int substring_identity_prop(const String *str, int verbose) {
+static int substring_identity_prop(const String *str) {
     /* if start = 0 and end = str->len, then susbtr = str */
     String *substr;
     int prop_upheld;
@@ -308,7 +311,7 @@ static int substring_identity_prop(const String *str, int verbose) {
     prop_upheld = substr->len == str->len && check_mem_equal(substr->chars, str->chars, str->len);
     free_string(substr);
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = prop_upheld ?
             COLOR_TEXT(GREEN, "upheld") :
             COLOR_TEXT(RED, "violated");
@@ -318,23 +321,23 @@ static int substring_identity_prop(const String *str, int verbose) {
     return prop_upheld;
 }
 
-static int substring_test_properties(const char *cstr, size_t len, int verbose) {
+static int substring_test_properties(const char *cstr, size_t len) {
     String *str = create_string(cstr, len);
 
     if (cstr == NULL) {
         String *substr = substring(str, 0, 1);  /* start and end values are arbitrary and irrelevant here */
-        return check_null_property_upheld(substr, errno, len, verbose);
+        return check_null_property_upheld(substr, errno, len);
     }
 
-    if (verbose) {
+    if (VERBOSE) {
         printf("    testing properties for \"%s\" length %lu\n", cstr, len);
     }
 
-    int invalid_range_prop_upheld = substring_invalid_range_prop(str, len, verbose);
-    int out_of_bounds_prop_upheld = substring_oob_prop(str, verbose);
-    int empty_string_prop_upheld = substring_empty_str_prop(str, verbose);
-    int char_at_prop_upheld = substring_char_at_prop(str, verbose);
-    int identity_prop_upheld = substring_identity_prop(str, verbose);
+    int invalid_range_prop_upheld = substring_invalid_range_prop(str, len);
+    int out_of_bounds_prop_upheld = substring_oob_prop(str);
+    int empty_string_prop_upheld = substring_empty_str_prop(str);
+    int char_at_prop_upheld = substring_char_at_prop(str);
+    int identity_prop_upheld = substring_identity_prop(str);
 
     free_string(str);
     return (invalid_range_prop_upheld
@@ -346,8 +349,7 @@ static int substring_test_properties(const char *cstr, size_t len, int verbose) 
 
 static int substring_test_examples(const char *cstr, size_t len,
                                    long start, long end,
-                                   const char *csubstr, size_t substr_len,
-                                   int verbose) {
+                                   const char *csubstr, size_t substr_len) {
     /* not the point of this function (and NULL case already tested in properties) */
     assert(cstr != NULL && csubstr != NULL);
 
@@ -360,7 +362,7 @@ static int substring_test_examples(const char *cstr, size_t len,
 
     int expectation_met = string_equal(expected_substr, substr);
 
-    if (verbose) {
+    if (VERBOSE) {
         const char *result = expectation_met ?
             COLOR_TEXT(GREEN, "ok") :
             COLOR_TEXT(RED, "not ok");
@@ -390,67 +392,67 @@ static int tally_test_results(int *results, int num_tests) {
     return final_result ? SUCCESS : FAILURE;
 }
 
-static int string_copy_test(int verbose) {
+static int string_copy_test() {
     int test_results[] = {
-        string_copy_test_properties(NULL, 1, verbose),
-        string_copy_test_properties("", 0, verbose),
-        string_copy_test_properties("I <3 C", 6, verbose),
-        string_copy_test_properties("should be simple", 16, verbose),
+        string_copy_test_properties(NULL, 1),
+        string_copy_test_properties("", 0),
+        string_copy_test_properties("I <3 C", 6),
+        string_copy_test_properties("should be simple", 16),
     };
 
     int num_tests = sizeof(test_results) / sizeof(int);
     return tally_test_results(test_results, num_tests);
 }
 
-static int create_string_test(int verbose) {
+static int create_string_test() {
     int test_results[] = {
-        create_string_test_properties(NULL, 1, verbose),
-        create_string_test_properties("", 0, verbose),
-        create_string_test_properties("I <3 C", 6, verbose),
-        create_string_test_properties("123456789", 9, verbose),
-        create_string_test_properties("shorter", 5, verbose),
+        create_string_test_properties(NULL, 1),
+        create_string_test_properties("", 0),
+        create_string_test_properties("I <3 C", 6),
+        create_string_test_properties("123456789", 9),
+        create_string_test_properties("shorter", 5),
     };
 
     int num_tests = sizeof(test_results) / sizeof(int);
     return tally_test_results(test_results, num_tests);
 }
 
-static int string_reverse_test(int verbose) {
+static int string_reverse_test() {
     int test_results[] = {
-        string_reverse_test_properties(NULL, 1, verbose),
-        string_reverse_test_properties("", 0, verbose),
-        string_reverse_test_properties("abc", 3, verbose),
-        string_reverse_test_properties("another day", 11, verbose),
-        string_reverse_test_properties("even", 4, verbose),
-        string_reverse_test_properties("123456789123456789123456789", 27, verbose),
+        string_reverse_test_properties(NULL, 1),
+        string_reverse_test_properties("", 0),
+        string_reverse_test_properties("abc", 3),
+        string_reverse_test_properties("another day", 11),
+        string_reverse_test_properties("even", 4),
+        string_reverse_test_properties("123456789123456789123456789", 27),
 
-        string_reverse_test_examples("", "", 0, verbose),
-        string_reverse_test_examples("abc", "cba", 3, verbose),
-        string_reverse_test_examples("another day", "yad rehtona", 11, verbose),
-        string_reverse_test_examples("even", "neve", 4, verbose),
-        string_reverse_test_examples("123456789123456789123456789", "987654321987654321987654321", 27, verbose),
+        string_reverse_test_examples("", "", 0),
+        string_reverse_test_examples("abc", "cba", 3),
+        string_reverse_test_examples("another day", "yad rehtona", 11),
+        string_reverse_test_examples("even", "neve", 4),
+        string_reverse_test_examples("123456789123456789123456789", "987654321987654321987654321", 27),
     };
 
     int num_tests = sizeof(test_results) / sizeof(int);
     return tally_test_results(test_results, num_tests);
 }
 
-static int substring_test(int verbose) {
+static int substring_test() {
     int test_results[] = {
-        substring_test_properties(NULL, 0, verbose),
-        substring_test_properties("", 0, verbose),
-        substring_test_properties("a", 1, verbose),
-        substring_test_properties("ab", 2, verbose),
-        substring_test_properties("abc", 3, verbose),
-        substring_test_properties("a few words", 11, verbose),
+        substring_test_properties(NULL, 0),
+        substring_test_properties("", 0),
+        substring_test_properties("a", 1),
+        substring_test_properties("ab", 2),
+        substring_test_properties("abc", 3),
+        substring_test_properties("a few words", 11),
 
-        substring_test_examples("", 0, 0, 0, "", 0, verbose),
-        substring_test_examples("abc", 3, 0, -1, "abc", 3, verbose),
-        substring_test_examples("abc", 3, 0, 3, "abc", 3, verbose),
-        substring_test_examples("abc", 3, 1, -1, "bc", 2, verbose),
-        substring_test_examples("abc", 3, 1, 3, "bc", 2, verbose),
-        substring_test_examples("abc", 3, 1, 2, "b", 1, verbose),
-        substring_test_examples("a few words", 11, 2, 5, "few", 3, verbose),
+        substring_test_examples("", 0, 0, 0, "", 0),
+        substring_test_examples("abc", 3, 0, -1, "abc", 3),
+        substring_test_examples("abc", 3, 0, 3, "abc", 3),
+        substring_test_examples("abc", 3, 1, -1, "bc", 2),
+        substring_test_examples("abc", 3, 1, 3, "bc", 2),
+        substring_test_examples("abc", 3, 1, 2, "b", 1),
+        substring_test_examples("a few words", 11, 2, 5, "few", 3),
     };
 
     int num_tests = sizeof(test_results) / sizeof(int);
@@ -458,11 +460,9 @@ static int substring_test(int verbose) {
 }
 
 int main(int argc, char **argv) {
-    int verbose = 0;
-
     if (argc == 2) {
         if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--verbose") == 0) {
-            verbose = 1;
+            VERBOSE = 1;
         } else if (strcmp(argv[1], "--help") == 0) {
             printf(
                 "Usage: %s [-v|--verbose|--help]\n"
@@ -487,7 +487,7 @@ int main(int argc, char **argv) {
     suite_add_test(string_tests, "copy string", string_copy_test);
     suite_add_test(string_tests, "reverse string", string_reverse_test);
     suite_add_test(string_tests, "substring", substring_test);
-    run_test_suite(string_tests, verbose);
+    run_test_suite(string_tests, VERBOSE);
     free_test_suite(string_tests);
 
     return 0;

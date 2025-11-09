@@ -6,7 +6,7 @@
 
 typedef struct {
     const char *name;
-    int (*run)(int);
+    int (*run)();
 } Test;
 
 struct _test_suite {
@@ -42,7 +42,7 @@ void free_test_suite(TestSuite *suite) {
     free(suite);
 }
 
-static Test *create_test(const char *name, int (*run)(int)) {
+static Test *create_test(const char *name, int (*run)()) {
     if (name == NULL || run == NULL) {
         return NULL;
     }
@@ -53,7 +53,7 @@ static Test *create_test(const char *name, int (*run)(int)) {
     return test;
 }
 
-void suite_add_test(TestSuite *suite, const char *test_name, int (*run)(int)) {
+void suite_add_test(TestSuite *suite, const char *test_name, int (*run)()) {
     suite->num_tests++;
     suite->tests = realloc(suite->tests, suite->num_tests * sizeof(Test *));
 
@@ -104,7 +104,7 @@ void run_test_suite(TestSuite *suite, int verbose) {
                 test_result = FAILURE;
             }
         } else {  /* child */
-            test_result = suite->tests[i]->run(verbose);
+            test_result = suite->tests[i]->run();
             free_test_suite(suite);  /* not strictly necessary, but makes finding real memory leaks easier */
             exit(test_result);
         }

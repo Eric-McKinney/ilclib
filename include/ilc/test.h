@@ -17,7 +17,7 @@ typedef struct _test_suite TestSuite;
 
 TestSuite *create_test_suite(const char *name);
 void free_test_suite(TestSuite *suite);
-void suite_add_test(TestSuite *suite, const char *test_name, int (*run)(int));
+void suite_add_test(TestSuite *suite, const char *test_name, int (*run)());
 void run_test_suite(TestSuite *suite, int verbose);
 int check_mem_equal(const void *actual, const void *expected, size_t size);
 
