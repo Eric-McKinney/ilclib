@@ -96,8 +96,7 @@ String *substring(const String *str, long start, long end) {
         return NULL;
     }
 
-    if (start == str->len || (unsigned long) labs(start) > str->len
-                          || (unsigned long) labs(end) > str->len) {
+    if ((unsigned long) labs(start) > str->len || (unsigned long) labs(end) > str->len) {
         errno = EDOM;
         return NULL;
     }
@@ -106,7 +105,7 @@ String *substring(const String *str, long start, long end) {
         start = str->len + start;
     }
     if (end < 0) {
-        end = str->len + end;
+        end = str->len + end + 1;  /* + 1 bc end is inclusive when negative, so translate to exclusive */
     }
 
     if (start > end) {
