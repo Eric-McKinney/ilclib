@@ -97,6 +97,10 @@ void run_test_suite(TestSuite *suite, int verbose) {
             if (WIFEXITED(status)) {
                 test_result = WEXITSTATUS(status);
             } else {
+                if (verbose && WIFSIGNALED(status) && WTERMSIG(status) == 11) {  /* 11 is SIGSEGV */
+                    printf("    test had a " COLOR_TEXT(RED, "segmentation fault") "\n");
+                }
+
                 test_result = FAILURE;
             }
         } else {  /* child */
