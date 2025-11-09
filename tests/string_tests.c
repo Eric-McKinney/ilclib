@@ -177,6 +177,16 @@ static int string_reverse_test_examples(const char *cstr, const char *cstr_rever
     return expectation_met;
 }
 
+static int tally_test_results(int *results, int num_tests) {
+    int final_result = 1;
+    int i;
+    for (i = 0; i < num_tests; i++) {
+        final_result = final_result && results[i];
+    }
+
+    return final_result ? SUCCESS : FAILURE;
+}
+
 static int string_copy_test(int verbose) {
     int test_results[] = {
         string_copy_test_properties(NULL, 1, verbose),
@@ -186,13 +196,7 @@ static int string_copy_test(int verbose) {
     };
 
     int num_tests = sizeof(test_results) / sizeof(int);
-    int final_result = 1;
-    int i;
-    for (i = 0; i < num_tests; i++) {
-        final_result = final_result && test_results[i];
-    }
-
-    return final_result ? SUCCESS : FAILURE;
+    return tally_test_results(test_results, num_tests);
 }
 
 static int create_string_test(int verbose) {
@@ -205,13 +209,7 @@ static int create_string_test(int verbose) {
     };
 
     int num_tests = sizeof(test_results) / sizeof(int);
-    int final_result = 1;
-    int i;
-    for (i = 0; i < num_tests; i++) {
-        final_result = final_result && test_results[i];
-    }
-
-    return final_result ? SUCCESS : FAILURE;
+    return tally_test_results(test_results, num_tests);
 }
 
 static int string_reverse_test(int verbose) {
@@ -231,13 +229,9 @@ static int string_reverse_test(int verbose) {
     };
 
     int num_tests = sizeof(test_results) / sizeof(int);
-    int final_result = 1;
-    int i;
-    for (i = 0; i < num_tests; i++) {
-        final_result = final_result && test_results[i];
-    }
+    return tally_test_results(test_results, num_tests);
+}
 
-    return final_result ? SUCCESS : FAILURE;
 }
 
 int main(int argc, char **argv) {
