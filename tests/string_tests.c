@@ -15,7 +15,7 @@ static int check_null_property_upheld(const String *ret_val, int errno_val, size
         const char *result = ret_val_ok && errno_ok ?
             COLOR_TEXT(GREEN, "upheld") :
             COLOR_TEXT(RED, "violated");
-        printf("    properties %s (given NULL, length: %lu)\n", result, len);
+        printf("    null property %s (given NULL, length: %lu)\n", result, len);
         if (!ret_val_ok) {
             printf("        " COLOR_TEXT(RED, "return value != NULL") "\n");
         }
