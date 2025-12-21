@@ -214,3 +214,42 @@ void string_print(const String *str) {
         printf("%c", str->chars[i]);
     }
 }
+
+/* like string_equal, but only compares up to str2 length from given start in str1 */
+/* keeping this static bc it is made specially for string_contains & is easy to misuse */
+static int bounded_string_equal(const String *str1, const String *str2, size_t start) {
+    /* assuming: str2->len <= str1->len and that start + str2->len <= str1->len */
+    size_t i;
+    for (i = 0; i < str2->len; i++) {
+        if (str1->chars[i + start] != str2->chars[i]) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+int string_contains(const String *str, const String *substr) {
+    if (str == NULL || substr == NULL) {
+        errno = EFAULT;
+        return 0;
+    }
+
+    if (str->len < substr->len) {
+        return 0;
+    }
+
+    if (substr->len == 0) {
+        return 1;
+    }
+
+    size_t i;
+    for (i = 0; i <= str->len - substr->len; i++) {
+        if (bounded_string_equal(str, substr, i)) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
