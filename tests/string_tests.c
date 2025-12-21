@@ -474,9 +474,9 @@ static int string_contains_test_properties(const char *cstr, size_t len) {
     return props_upheld;
 }
 
-static int string_contains_test_examples(const char *cstr, size_t len,
-                                         const char *cstr2, size_t len2,
-                                         int expected_ret) {
+static int string_contains_at_test_examples(const char *cstr, size_t len,
+                                            const char *cstr2, size_t len2,
+                                            int expected_ret, size_t expected_idx) {
     /* not the point of this function (and NULL case already tested in properties) */
     assert(cstr != NULL && cstr2 != NULL);
 
@@ -487,18 +487,20 @@ static int string_contains_test_examples(const char *cstr, size_t len,
     /* test is meaningless if strings can't be created */
     assert(str != NULL && str2 != NULL);
 
-    int contains = string_contains(str, str2);
+    size_t idx = 0 - 1;  /* largest size_t so its obvious if idx isn't filled in */
+    int contains = string_contains_at(str, str2, &idx);
     int errno_val = errno;
 
     int ret_val_ok = contains == expected_ret;
     int errno_ok = errno_val == expected_errno;
-    int test_ok = ret_val_ok && errno_ok;
+    int idx_ok = !contains || idx == expected_idx;
+    int test_ok = ret_val_ok && errno_ok && idx_ok;
 
     if (VERBOSE) {
         const char *result = test_ok ?
             COLOR_TEXT(GREEN, "passed") :
             COLOR_TEXT(RED, "failed");
-        printf("    string_contains(\"%s\", \"%s\") %s\n", cstr, cstr2, result);
+        printf("    string_contains_at(\"%s\", \"%s\", &idx) %s\n", cstr, cstr2, result);
 
         if (!ret_val_ok) {
             printf("        " COLOR_TEXT(RED, "returned %d, expected %d") "\n",
@@ -507,6 +509,10 @@ static int string_contains_test_examples(const char *cstr, size_t len,
         if (!errno_ok) {
             printf("        " COLOR_TEXT(RED, "errno is %d, expected %d") "\n",
                    errno_val, expected_errno);
+        }
+        if (!idx_ok) {
+            printf("        " COLOR_TEXT(RED, "idx is %lu, expected %lu") "\n",
+                   idx, expected_idx);
         }
     }
 
@@ -594,23 +600,31 @@ static int substring_test() {
 
 static int string_contains_test() {
     int test_results[] = {
+        /*
+         * string_contains is syntactic sugar for string_contains_at with an
+         * unused index, so they're really the same thing
+         *
+         * I just don't think the index is really relevant for the property tests,
+         * so I use string_contains for properties and string_contains_at for examples
+         */
         string_contains_test_properties(NULL, 0),
         string_contains_test_properties("", 0),
         string_contains_test_properties("abc", 3),
         string_contains_test_properties("I <3 C", 6),
 
-        string_contains_test_examples("", 0, "", 0, 1),
-        string_contains_test_examples("abc", 3, "", 0, 1),
-        string_contains_test_examples("abc", 3, "ab", 2, 1),
-        string_contains_test_examples("abc", 3, "bc", 2, 1),
-        string_contains_test_examples("abc", 3, "ac", 2, 0),
-        string_contains_test_examples("abc", 3, "ba", 2, 0),
-        string_contains_test_examples("abc", 3, "cb", 2, 0),
-        string_contains_test_examples("abc", 3, "a", 1, 1),
-        string_contains_test_examples("abc", 3, "b", 1, 1),
-        string_contains_test_examples("abc", 3, "c", 1, 1),
-        string_contains_test_examples("I <3 C", 6, "<3", 2, 1),
-        string_contains_test_examples("I <3 C", 6, "c", 1, 0),
+        string_contains_at_test_examples("", 0, "", 0, 1, 0),
+        string_contains_at_test_examples("abc", 3, "", 0, 1, 0),
+        string_contains_at_test_examples("abc", 3, "ab", 2, 1, 0),
+        string_contains_at_test_examples("abc", 3, "bc", 2, 1, 1),
+        string_contains_at_test_examples("abc", 3, "ac", 2, 0, 0),
+        string_contains_at_test_examples("abc", 3, "ba", 2, 0, 0),
+        string_contains_at_test_examples("abc", 3, "cb", 2, 0, 0),
+        string_contains_at_test_examples("abc", 3, "a", 1, 1, 0),
+        string_contains_at_test_examples("abc", 3, "b", 1, 1, 1),
+        string_contains_at_test_examples("abc", 3, "c", 1, 1, 2),
+        string_contains_at_test_examples("I <3 C", 6, "<3", 2, 1, 2),
+        string_contains_at_test_examples("I <3 C", 6, "c", 1, 0, 0),
+        string_contains_at_test_examples("C", 1, "I <3 C", 6, 0, 0),
     };
 
     int num_tests = sizeof(test_results) / sizeof(int);
