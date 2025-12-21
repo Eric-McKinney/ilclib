@@ -230,6 +230,10 @@ static int bounded_string_equal(const String *str1, const String *str2, size_t s
 }
 
 int string_contains(const String *str, const String *substr) {
+    return string_contains_at(str, substr, NULL);
+}
+
+int string_contains_at(const String *str, const String *substr, size_t *idx) {
     if (str == NULL || substr == NULL) {
         errno = EFAULT;
         return 0;
@@ -240,16 +244,21 @@ int string_contains(const String *str, const String *substr) {
     }
 
     if (substr->len == 0) {
+        if (idx != NULL) {
+            *idx = 0;
+        }
         return 1;
     }
 
     size_t i;
     for (i = 0; i <= str->len - substr->len; i++) {
         if (bounded_string_equal(str, substr, i)) {
+            if (idx != NULL) {
+                *idx = i;
+            }
             return 1;
         }
     }
 
     return 0;
 }
-

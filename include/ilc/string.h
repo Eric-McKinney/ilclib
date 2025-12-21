@@ -18,5 +18,6 @@ int string_equal(const String *str1, const String *str2);
 int string_compare(const String *str1, const String *str2);
 void string_print(const String *str);
 int string_contains(const String *str, const String *substr);
+int string_contains_at(const String *str, const String *substr, size_t *idx);
 
 #endif
