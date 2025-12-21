@@ -382,6 +382,139 @@ static int substring_test_examples(const char *cstr, size_t len,
     return expectation_met;
 }
 
+static int string_contains_prop_helper(const char *prop_name,
+                                       const String *str, const String *test,
+                                       int expected_ret, int expected_errno) {
+    errno = 0;
+    int contains = string_contains(str, test);
+    int errno_val = errno;
+
+    int ret_val_ok = contains == expected_ret;
+    int errno_ok = errno_val == expected_errno;
+    int test_ok = ret_val_ok && errno_ok;
+
+    if (VERBOSE) {
+        if (!test_ok) {
+            printf("    %s " COLOR_TEXT(RED, "violated") "\n", prop_name);
+        }
+        if (!ret_val_ok) {
+            printf("        " COLOR_TEXT(RED, "returned %d, expected %d") "\n",
+                   contains, expected_ret);
+        }
+        if (!errno_ok) {
+            printf("        " COLOR_TEXT(RED, "errno is %d, expected %d") "\n",
+                   errno_val, expected_errno);
+        }
+    }
+
+    return test_ok;
+}
+static int string_contains_null_prop(const String *str) {
+    /* when given NULL instead of a string, return 0 and set errno = EFAULT */
+    return string_contains_prop_helper("null property", str, NULL, 0, EFAULT);
+}
+
+static int string_contains_empty_prop(const String *str) {
+    /* every string contains the empty string */
+    String *empty = create_string("", 0);
+    assert(empty != NULL);
+
+    int result = (str != NULL) ?
+        string_contains_prop_helper("empty property", str, empty, 1, 0) :
+        string_contains_prop_helper("empty property", str, empty, 0, EFAULT);
+
+    free_string(empty);
+    return result;
+}
+
+static int string_contains_reflexive_prop(const String *str) {
+    /* every string contains itself */
+    return (str != NULL) ?
+        string_contains_prop_helper("reflexive property", str, str, 1, 0) :
+        string_contains_prop_helper("reflexive property", str, str, 0, EFAULT);
+}
+
+static int string_contains_length_prop(const String *str) {
+    /* a string cannot contain a string with a length larger than its own */
+    if (str == NULL) {
+        return 1;  /* skip NULL case */
+    }
+
+    String *larger = create_string(str->chars, str->len + 1);
+    assert(larger != NULL);
+
+    int result = string_contains_prop_helper("length property", str, larger, 0, 0);
+
+    free_string(larger);
+    return result;
+}
+
+static int string_contains_test_properties(const char *cstr, size_t len) {
+    String *str = create_string(cstr, len);
+
+    if (VERBOSE) {
+        printf("    testing properties for \"%s\"\n", cstr);
+    }
+
+    int null_prop_upheld = string_contains_null_prop(str);
+    int empty_prop_upheld = string_contains_empty_prop(str);
+    int reflexive_prop_upheld = string_contains_reflexive_prop(str);
+    int length_prop_upheld = string_contains_length_prop(str);
+
+    free_string(str);
+    int props_upheld = (null_prop_upheld
+        && empty_prop_upheld
+        && reflexive_prop_upheld
+        && length_prop_upheld);
+
+    if (VERBOSE && props_upheld) {
+        printf("        properties " COLOR_TEXT(GREEN, "upheld") "\n");
+    }
+
+    return props_upheld;
+}
+
+static int string_contains_test_examples(const char *cstr, size_t len,
+                                         const char *cstr2, size_t len2,
+                                         int expected_ret) {
+    /* not the point of this function (and NULL case already tested in properties) */
+    assert(cstr != NULL && cstr2 != NULL);
+
+    String *str = create_string(cstr, len);
+    String *str2 = create_string(cstr2, len2);
+    int expected_errno = 0;
+
+    /* test is meaningless if strings can't be created */
+    assert(str != NULL && str2 != NULL);
+
+    int contains = string_contains(str, str2);
+    int errno_val = errno;
+
+    int ret_val_ok = contains == expected_ret;
+    int errno_ok = errno_val == expected_errno;
+    int test_ok = ret_val_ok && errno_ok;
+
+    if (VERBOSE) {
+        const char *result = test_ok ?
+            COLOR_TEXT(GREEN, "passed") :
+            COLOR_TEXT(RED, "failed");
+        printf("    string_contains(\"%s\", \"%s\") %s\n", cstr, cstr2, result);
+
+        if (!ret_val_ok) {
+            printf("        " COLOR_TEXT(RED, "returned %d, expected %d") "\n",
+                   contains, expected_ret);
+        }
+        if (!errno_ok) {
+            printf("        " COLOR_TEXT(RED, "errno is %d, expected %d") "\n",
+                   errno_val, expected_errno);
+        }
+    }
+
+    free_string(str);
+    free_string(str2);
+    return test_ok;
+}
+
 static int tally_test_results(int *results, int num_tests) {
     int final_result = 1;
     int i;
@@ -459,6 +592,31 @@ static int substring_test() {
     return tally_test_results(test_results, num_tests);
 }
 
+static int string_contains_test() {
+    int test_results[] = {
+        string_contains_test_properties(NULL, 0),
+        string_contains_test_properties("", 0),
+        string_contains_test_properties("abc", 3),
+        string_contains_test_properties("I <3 C", 6),
+
+        string_contains_test_examples("", 0, "", 0, 1),
+        string_contains_test_examples("abc", 3, "", 0, 1),
+        string_contains_test_examples("abc", 3, "ab", 2, 1),
+        string_contains_test_examples("abc", 3, "bc", 2, 1),
+        string_contains_test_examples("abc", 3, "ac", 2, 0),
+        string_contains_test_examples("abc", 3, "ba", 2, 0),
+        string_contains_test_examples("abc", 3, "cb", 2, 0),
+        string_contains_test_examples("abc", 3, "a", 1, 1),
+        string_contains_test_examples("abc", 3, "b", 1, 1),
+        string_contains_test_examples("abc", 3, "c", 1, 1),
+        string_contains_test_examples("I <3 C", 6, "<3", 2, 1),
+        string_contains_test_examples("I <3 C", 6, "c", 1, 0),
+    };
+
+    int num_tests = sizeof(test_results) / sizeof(int);
+    return tally_test_results(test_results, num_tests);
+}
+
 int main(int argc, char **argv) {
     if (argc == 2) {
         if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--verbose") == 0) {
@@ -487,6 +645,7 @@ int main(int argc, char **argv) {
     suite_add_test(string_tests, "copy string", string_copy_test);
     suite_add_test(string_tests, "reverse string", string_reverse_test);
     suite_add_test(string_tests, "substring", substring_test);
+    suite_add_test(string_tests, "string contains", string_contains_test);
     run_test_suite(string_tests, VERBOSE);
     free_test_suite(string_tests);
 
