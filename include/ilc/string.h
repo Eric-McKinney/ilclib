@@ -20,4 +20,9 @@ void string_print(const String *str);
 int string_contains(const String *str, const String *substr);
 int string_contains_at(const String *str, const String *substr, size_t *idx);
 
+// TODO: String *string_concat(const String *first, const String *second);
+// TODO: int string_append(String *str, const String *to_append);
+// TODO: String **string_split(const String *str1, const String *str2, size_t *num_strings);
+// TODO: String *string_join(const String **string_list, size_t num_strings);
+
 #endif
