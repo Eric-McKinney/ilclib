@@ -273,3 +273,31 @@ int string_contains_at(const String *str, const String *substr, size_t *idx) {
 
     return 0;
 }
+
+String *string_concat(const String *first, const String *second) {
+    if (first == NULL || second == NULL) {
+        errno = EFAULT;
+        return NULL;
+    }
+
+    String *concat = malloc(sizeof(String));
+
+    size_t concat_len = first->len + second->len;
+    char *chars = malloc(concat_len);
+
+    if (concat == NULL || chars == NULL) {
+        free(concat);
+        free(chars);
+
+        errno = ENOMEM;
+        return NULL;
+    }
+
+    mem_copy(chars, first->chars, first->len);
+    mem_copy(chars + first->len, second->chars, second->len);
+
+    concat->chars = chars;
+    concat->len = concat_len;
+
+    return concat;
+}
