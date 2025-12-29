@@ -301,3 +301,29 @@ String *string_concat(const String *first, const String *second) {
 
     return concat;
 }
+
+int string_append(String *str, const String *to_append) {
+    if (str == NULL || to_append == NULL) {
+        errno = EFAULT;
+        return EFAULT;
+    }
+
+    /* not strictly necessary but saves time */
+    if (to_append->len == 0) {
+        return 0;
+    }
+
+    size_t concat_len = str->len + to_append->len;
+    char *chars = realloc(str->chars, concat_len);
+    if (chars == NULL) {
+        /* errno set by realloc when it fails */
+        return ENOMEM;
+    }
+
+    mem_copy(chars + str->len, to_append->chars, to_append->len);
+
+    str->chars = chars;
+    str->len = concat_len;
+
+    return 0;
+}
