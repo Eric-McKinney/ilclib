@@ -215,6 +215,17 @@ void string_print(const String *str) {
     }
 }
 
+void string_debug_print(const String *str) {
+    if (str == NULL) {
+        printf("NULL");
+        return;
+    }
+
+    printf("{chars: \"");
+    string_print(str);
+    printf("\", len: %lu}", str->len);
+}
+
 /* like string_equal, but only compares up to str2 length from given start in str1 */
 /* keeping this static bc it is made specially for string_contains & is easy to misuse */
 static int bounded_string_equal(const String *str1, const String *str2, size_t start) {

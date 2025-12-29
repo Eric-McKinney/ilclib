@@ -17,6 +17,7 @@ char *string_to_c_string(const String *str);
 int string_equal(const String *str1, const String *str2);
 int string_compare(const String *str1, const String *str2);
 void string_print(const String *str);
+void string_debug_print(const String *str);
 int string_contains(const String *str, const String *substr);
 int string_contains_at(const String *str, const String *substr, size_t *idx);
 
