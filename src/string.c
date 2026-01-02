@@ -327,3 +327,20 @@ int string_append(String *str, const String *to_append) {
 
     return 0;
 }
+
+String *string_split(const String *str, const String *delim,
+                     size_t *num_strs) {
+    if (str == NULL || delim == NULL || num_strs == NULL) {
+        errno = EFAULT;
+        return NULL;
+    }
+
+    /* cannot split a string by a delimeter bigger than the string */
+    if (delim->len > str->len) {
+        errno = EINVAL;
+        return NULL;
+    }
+
+    // TODO: implement the actual string splitting part
+    //       (might want to use helper function from string_contains_at)
+}
