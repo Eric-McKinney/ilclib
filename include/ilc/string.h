@@ -22,8 +22,8 @@ int string_contains(const String *str, const String *substr);
 int string_contains_at(const String *str, const String *substr, size_t *idx);
 String *string_concat(const String *first, const String *second);
 int string_append(String *str, const String *to_append);
+String *string_split(const String *str, const String *delim, size_t *num_strs);
 
-// TODO: String *string_split(const String *str, const String *delim, size_t *num_strs);
-// TODO: String *string_join(const String *strs, size_t num_strs);
+// TODO: String *string_join(const String *delim, const String *strs, size_t num_strs);
 
 #endif

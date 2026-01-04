@@ -328,8 +328,53 @@ int string_append(String *str, const String *to_append) {
     return 0;
 }
 
-String *string_split(const String *str, const String *delim,
-                     size_t *num_strs) {
+static size_t *find_delims(const String *str, const String *delim, size_t *num_delims) {
+    *num_delims = 0;
+    /* allocate enough space for max number of sequential delims */
+    size_t *delim_locations = malloc((str->len / delim->len) * sizeof(size_t));
+    if (delim_locations == NULL) {
+        return NULL;
+    }
+
+    size_t i;
+    for (i = 0; i < str->len - delim->len; i++) {
+        if (bounded_string_equal(str, delim, i)) {
+            delim_locations[*num_delims] = i;
+            *num_delims += 1;
+
+            /* skip over rest of delim */
+            i += delim->len - 1;  /* -1 to account for i++ at end of iteration */
+        }
+    }
+
+    return delim_locations;
+}
+
+static String *create_string_splits(const String *str, size_t num_strs,
+                                    size_t delim_len, size_t *delim_locations,
+                                    size_t num_delims) {
+    String *strs = malloc(num_strs * sizeof(String));
+    if (strs == NULL) {
+        return NULL;
+    }
+
+    size_t s_start = 0;
+    for (i = 0; i < num_delims; i++) {
+        String *s = &strs[i];
+        s->chars = str->chars + s_start;
+        s->len = delim_locations[i] - s_start;
+
+        s_start += delim_locations[i] + delim_len;
+    }
+
+    String *last_s = &strs[num_strs - 1];
+    last_s->chars = str->chars + s_start;
+    last_s->len = str->len - s_start;
+
+    return strs;
+}
+
+String *string_split(const String *str, const String *delim, size_t *num_strs) {
     if (str == NULL || delim == NULL || num_strs == NULL) {
         errno = EFAULT;
         return NULL;
@@ -341,6 +386,24 @@ String *string_split(const String *str, const String *delim,
         return NULL;
     }
 
-    // TODO: implement the actual string splitting part
-    //       (might want to use helper function from string_contains_at)
+    size_t num_delims;
+    size_t *delim_locations = find_delims(str, delim, &num_delims);
+    if (delim_locations == NULL) {
+        errno = ENOMEM;
+        return NULL;
+    }
+
+    /* always 1 more string than total instances of delimeter */
+    *num_strs = num_delims + 1;
+
+    String *strs = create_string_splits(str, *num_strs, delim->len,
+                                        delim_locations, num_delims);
+    if (strs == NULL) {
+        free(delim_locations);
+        errno = ENOMEM;
+        return NULL;
+    }
+
+    free(delim_locations);
+    return strs;
 }
