@@ -359,6 +359,7 @@ static String *create_string_splits(const String *str, size_t num_strs,
     }
 
     size_t s_start = 0;
+    size_t i;
     for (i = 0; i < num_delims; i++) {
         String *s = &strs[i];
         s->chars = str->chars + s_start;
