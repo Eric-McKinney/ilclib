@@ -558,7 +558,7 @@ static int string_concat_prop_helper(const char *prop_name,
                    first_errno, expected_errno);
         }
         if (!second_ret_ok) {
-            printf("        given order: " RED "returned ");
+            printf("        reversed order: " RED "returned ");
             string_debug_print(second_concat);
             printf(", expected ");
             string_debug_print(expected);
@@ -665,6 +665,166 @@ static int string_concat_test_examples(const char *cstr, size_t len,
 
     return test_ok;
 }
+
+static int string_append_prop_helper(const char *prop_name,
+                                     const String *first, const String *second,
+                                     const String *expected, int expected_errno) {
+    errno = 0;
+    String *first_copy = string_copy(first);
+
+    int first_ret = string_append(first_copy, second);
+    int first_errno = errno;
+
+    errno = 0;
+    String *second_copy = string_copy(second);
+
+    int second_ret = string_append(second_copy, first);
+    int second_errno = errno;
+
+    int first_str_ok = (first_ret == 0) ? string_equal(first_copy, expected) : 1;
+    int first_ret_ok = first_ret == expected_errno;
+    int second_str_ok = (second_ret == 0) ? string_equal(second_copy, expected) : 1;
+    int second_ret_ok = second_ret == expected_errno;
+    int first_errno_ok = first_errno == expected_errno;
+    int second_errno_ok = second_errno == expected_errno;
+    int test_ok = (first_str_ok && first_ret_ok
+        && second_str_ok && second_ret_ok
+        && first_errno_ok
+        && second_errno_ok);
+
+    if (VERBOSE) {
+        if (!test_ok) {
+            printf("    %s " COLOR_TEXT(RED, "violated") "\n", prop_name);
+        }
+        if (!first_str_ok) {
+            printf("        given order: " RED "result is ");
+            string_debug_print(first_copy);
+            printf(", expected ");
+            string_debug_print(expected);
+            printf(END_COLOR "\n");
+        }
+        if (!first_ret_ok) {
+            printf("        given order: " COLOR_TEXT(RED, "returned %d, expected %d") "\n",
+                   first_ret, expected_errno);
+        }
+        if (!first_errno_ok) {
+            printf("        given order: "
+                   COLOR_TEXT(RED, "errno is %d, expected %d") "\n",
+                   first_errno, expected_errno);
+        }
+        if (!second_str_ok) {
+            printf("        reversed order: " RED "result is ");
+            string_debug_print(second_copy);
+            printf(", expected ");
+            string_debug_print(expected);
+            printf(END_COLOR "\n");
+        }
+        if (!second_ret_ok) {
+            printf("        reversed order: " COLOR_TEXT(RED, "returned %d, expected %d") "\n",
+                   second_ret, expected_errno);
+        }
+        if (!second_errno_ok) {
+            printf("        reversed order: "
+                   COLOR_TEXT(RED, "errno is %d, expected %d") "\n",
+                   second_errno, expected_errno);
+        }
+    }
+
+    free_string(first_copy);
+    free_string(second_copy);
+
+    return test_ok;
+}
+
+static int string_append_null_prop(const String *str) {
+    /* append with NULL on either side returns EFAULT and errno set to EFAULT */
+    return string_append_prop_helper("null property", str, NULL, NULL, EFAULT);
+}
+
+static int string_append_empty_prop(const String *str) {
+    /* append with empty string on either side changes nothing */
+    String *empty = create_string("", 0);
+    assert(empty != NULL);
+
+    int expected_errno = (str == NULL) ? EFAULT : 0;
+    int result = string_append_prop_helper("empty string property", str, empty,
+                                           str, expected_errno);
+
+    free_string(empty);
+    return result;
+}
+
+static int string_append_test_properties(const char *cstr, size_t len) {
+    String *str = create_string(cstr, len);
+
+    if (VERBOSE) {
+        printf("    testing properties for \"%s\"\n", cstr);
+    }
+
+    int null_prop_upheld = string_append_null_prop(str);
+    int empty_prop_upheld = string_append_empty_prop(str);
+
+    free_string(str);
+    int props_upheld = null_prop_upheld && empty_prop_upheld;
+
+    if (VERBOSE && props_upheld) {
+        printf("        properties " COLOR_TEXT(GREEN, "upheld") "\n");
+    }
+
+    return props_upheld;
+}
+
+static int string_append_test_examples(const char *cstr, size_t len,
+                                       const char *cstr2, size_t len2,
+                                       const char *cstr_expected, size_t len_expected) {
+    /* not the point of this function (and NULL case already tested in properties) */
+    assert(cstr != NULL && cstr2 != NULL);
+
+    String *str = create_string(cstr, len);
+    String *str2 = create_string(cstr2, len2);
+    String *expected = create_string(cstr_expected, len_expected);
+
+    /* test is meaningless if strings can't be created */
+    assert(str != NULL && str2 != NULL && expected != NULL);
+
+    int ret_val = string_append(str, str2);
+    int errno_val = errno;
+
+    int str_ok = string_equal(str, expected);
+    int ret_val_ok = ret_val == 0;
+    int errno_ok = errno_val == 0;
+    int test_ok = str_ok && ret_val_ok && errno_ok;
+
+    if (VERBOSE) {
+        const char *result = test_ok ?
+            COLOR_TEXT(GREEN, "passed") :
+            COLOR_TEXT(RED, "failed");
+        printf("    string_append(\"%s\", \"%s\") %s\n", cstr, cstr2, result);
+
+        if (!str_ok) {
+            printf("        " RED "result is ");
+            string_debug_print(str);
+            printf(", expected ");
+            string_debug_print(expected);
+            printf(END_COLOR "\n");
+        }
+        if (!ret_val_ok) {
+            printf("        " COLOR_TEXT(RED, "returned %d, expected 0") "\n",
+                   ret_val);
+        }
+        if (!errno_ok) {
+            printf("        " COLOR_TEXT(RED, "errno is %d, expected %d") "\n",
+                   errno_val, 0);
+        }
+    }
+
+    free_string(str);
+    free_string(str2);
+    free_string(expected);
+
+    return test_ok;
+}
+
 
 static int tally_test_results(int *results, int num_tests) {
     int final_result = 1;
@@ -794,6 +954,24 @@ static int string_concat_test() {
     return tally_test_results(test_results, num_tests);
 }
 
+static int string_append_test() {
+    int test_results[] = {
+        string_append_test_properties(NULL, 0),
+        string_append_test_properties("", 0),
+        string_append_test_properties("abc", 3),
+        string_append_test_properties("I <3 C", 6),
+
+        string_append_test_examples("", 0, "", 0, "", 0),
+        string_append_test_examples("ab", 2, "c", 1, "abc", 3),
+        string_append_test_examples("abc", 3, "abc", 3, "abcabc", 6),
+        string_append_test_examples("abc", 3, "", 0, "abc", 3),
+        string_append_test_examples("I ", 2, "<3 C", 4, "I <3 C", 6),
+    };
+
+    int num_tests = sizeof(test_results) / sizeof(int);
+    return tally_test_results(test_results, num_tests);
+}
+
 int main(int argc, char **argv) {
     if (argc == 2) {
         if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--verbose") == 0) {
@@ -824,6 +1002,7 @@ int main(int argc, char **argv) {
     suite_add_test(string_tests, "substring", substring_test);
     suite_add_test(string_tests, "string contains", string_contains_test);
     suite_add_test(string_tests, "string concat", string_concat_test);
+    suite_add_test(string_tests, "string append", string_append_test);
     run_test_suite(string_tests, VERBOSE);
     free_test_suite(string_tests);
 
