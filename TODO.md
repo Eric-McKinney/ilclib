@@ -11,3 +11,9 @@
   - singly and doubly linked
   - implement higher order functions like sort, map, fold, and filter
 - logging maybe
+
+note: if writing tests gets to be a bit boring, then write some little
+mini-programs that do nothing but demo the functions
+
+
+also note: investigate/research single file library file organization
