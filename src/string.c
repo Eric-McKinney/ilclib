@@ -329,12 +329,36 @@ int string_append(String *str, const String *to_append) {
 }
 
 static size_t *find_delims(const String *str, const String *delim, size_t *num_delims) {
-    *num_delims = 0;
-    /* allocate enough space for max number of sequential delims */
-    size_t *delim_locations = malloc((str->len / delim->len) * sizeof(size_t));
+    size_t *delim_locations = NULL;
+
+    /* special case: delim is empty string, want to split on each char */
+    if (delim->len == 0) {
+        if (str->len == 0) {
+            *num_delims = 0;
+            return malloc(0);
+        }
+
+        *num_delims = str->len - 1;
+        delim_locations = malloc(*num_delims * sizeof(size_t));
+        if (delim_locations == NULL) {
+            return NULL;
+        }
+
+        size_t i;
+        for (i = 0; i < *num_delims; i++) {
+            delim_locations[i] = i + 1;
+        }
+
+        return delim_locations;
+    }
+
+    size_t max_num_delims = str->len / delim->len;
+    delim_locations = malloc(max_num_delims * sizeof(size_t));
     if (delim_locations == NULL) {
         return NULL;
     }
+
+    *num_delims = 0;
 
     size_t i;
     for (i = 0; i <= str->len - delim->len; i++) {
