@@ -440,12 +440,10 @@ static int string_contains_length_prop(const String *str) {
         return 1;  /* skip NULL case */
     }
 
-    String *larger = create_string(str->chars, str->len + 1);
-    assert(larger != NULL);
+    String larger = {str->chars, str->len + 1};
 
-    int result = string_contains_prop_helper("length property", str, larger, 0, 0);
+    int result = string_contains_prop_helper("length property", str, &larger, 0, 0);
 
-    free_string(larger);
     return result;
 }
 
