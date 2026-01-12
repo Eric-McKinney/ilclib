@@ -1051,10 +1051,39 @@ static int string_append_test() {
     return tally_test_results(test_results, num_tests);
 }
 
+static String *create_string_list(const char **strs, size_t *lens, size_t list_len) {
+    String *list = malloc(list_len * sizeof(String));
+
+    size_t i;
+    for (i = 0; i < list_len; i++) {
+        String *s = &list[i];
+
+        s->len = lens[i];
+        s->chars = malloc(s->len);
+        memcpy(s->chars, strs[i], s->len);
+    }
+
+    return list;
+}
+
+static void free_string_list(String *list, size_t list_len) {
+    size_t i;
+    for (i = 0; i < list_len; i++) {
+        String *s = &list[i];
+        free(s->chars);
+    }
+
+    free(list);
+}
+
 static int string_split_test() {
-    // TODO: create a string list artificially for comparison purposes
-    // String two_empty[] = create_string_list({"", ""}, {0, 0}, 2);
-    // String list_of_words[] = create_string_list({"list", "of", "words"}, {4, 2, 5}, 3);
+    const char *empty_strs[] = {"", ""};
+    size_t zeroes[] = {0,0};
+    String *two_empty = create_string_list(empty_strs, zeroes, 2);
+
+    const char *words[] = {"list", "of", "words"};
+    size_t word_lens[] = {4, 2, 5};
+    String *list_of_words = create_string_list(words, word_lens, 3);
 
     int test_results[] = {
         /* only testing examples bc properties are a little convoluted */
