@@ -337,7 +337,7 @@ static size_t *find_delims(const String *str, const String *delim, size_t *num_d
     }
 
     size_t i;
-    for (i = 0; i < str->len - delim->len; i++) {
+    for (i = 0; i <= str->len - delim->len; i++) {
         if (bounded_string_equal(str, delim, i)) {
             delim_locations[*num_delims] = i;
             *num_delims += 1;
@@ -365,7 +365,7 @@ static String *create_string_splits(const String *str, size_t num_strs,
         s->chars = str->chars + s_start;
         s->len = delim_locations[i] - s_start;
 
-        s_start += delim_locations[i] + delim_len;
+        s_start = delim_locations[i] + delim_len;
     }
 
     String *last_s = &strs[num_strs - 1];
