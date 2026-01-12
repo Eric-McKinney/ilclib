@@ -1083,6 +1083,14 @@ static int string_split_test() {
     size_t word_lens[] = {4, 2, 5};
     String *list_of_words = create_string_list(words, word_lens, 3);
 
+    const char *wads[] = {"w", "a", "d", "s"};
+    size_t ones[] = {1, 1, 1, 1};
+    String *wads_list = create_string_list(wads, ones, 4);
+
+    const char *empty[] = {""};
+    size_t zero[] = {0};
+    String *empty_str = create_string_list(empty, zero, 1);
+
     int test_results[] = {
         /* only testing examples bc properties are a little convoluted */
         /* doing examples only is just a lot more straightforward */
@@ -1091,10 +1099,15 @@ static int string_split_test() {
         string_split_test_examples("word", 4, "bigger", 6, NULL, 0, EINVAL),
         string_split_test_examples("wads", 4, "wads", 4, two_empty, 2, 0),
         string_split_test_examples("list, of, words", 15, ", ", 2, list_of_words, 3, 0),
+        string_split_test_examples("list of words", 13, " ", 1, list_of_words, 3, 0),
+        string_split_test_examples("wads", 4, "", 0, wads_list, 4, 0),
+        string_split_test_examples("", 0, "", 0, empty_str, 1, 0),
     };
 
     free_string_list(two_empty, 2);
     free_string_list(list_of_words, 3);
+    free_string_list(wads_list, 4);
+    free_string_list(empty_str, 1);
 
     int num_tests = sizeof(test_results) / sizeof(int);
     return tally_test_results(test_results, num_tests);
