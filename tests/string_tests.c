@@ -823,15 +823,14 @@ static int string_append_test_examples(const char *cstr, size_t len,
     return test_ok;
 }
 
-static int string_lists_equal(const String *list1, size_t len1,
-                              const String *list2, size_t len2) {
-    if (len1 != len2) {
+static int string_lists_equal(const StringList *list1, const StringList *list2) {
+    if (list1->len != list2->len) {
         return 0;
     }
 
     size_t i;
-    for (i = 0; i < len1; i++) {
-        if (!string_equal(&list1[i], &list2[i])) {
+    for (i = 0; i < list1->len; i++) {
+        if (!string_equal(&list1->strs[i], &list2->strs[i])) {
             return 0;
         }
     }
@@ -839,15 +838,15 @@ static int string_lists_equal(const String *list1, size_t len1,
     return 1;
 }
 
-static void string_list_debug_print(const String *list, size_t num_strs) {
+static void string_list_debug_print(const StringList *list) {
     printf("{");
 
     size_t i;
-    for (i = 0; i < num_strs; i++) {
+    for (i = 0; i < list->len; i++) {
         if (i != 0) {
             printf(", ");
         }
-        string_debug_print(&list[i]);
+        string_debug_print(&list->strs[i]);
     }
 
     printf("}");
@@ -855,21 +854,19 @@ static void string_list_debug_print(const String *list, size_t num_strs) {
 
 static int string_split_test_examples(const char *cstr, size_t len,
                                       const char *cdelim, size_t delim_len,
-                                      const String *expected_list, size_t list_len,
+                                      const StringList *expected_list,
                                       int expected_errno) {
     String *str = create_string(cstr, len);
     String *delim = create_string(cdelim, delim_len);
 
     errno = 0;
 
-    size_t num_strs = 0;
-    String *strs = string_split(str, delim, &num_strs);
+    StringList *strs = string_split(str, delim);
     int errno_val = errno;
 
-    int num_strs_ok = num_strs == list_len;
+    int num_strs_ok = (errno_val == 0) ? strs->len == expected_list->len : 1;
     int errno_ok = errno_val == expected_errno;
-    int str_list_ok = (errno_val == 0) ?
-        string_lists_equal(strs, num_strs, expected_list, list_len) : 1;
+    int str_list_ok = (errno_val == 0) ? string_lists_equal(strs, expected_list) : 1;
     int test_ok = num_strs_ok && errno_ok && str_list_ok;
 
     if (VERBOSE) {
@@ -880,7 +877,7 @@ static int string_split_test_examples(const char *cstr, size_t len,
 
         if (!num_strs_ok) {
             printf("        " COLOR_TEXT(RED, "string list length is %lu, expected %lu") "\n",
-                   num_strs, list_len);
+                   strs->len, expected_list->len);
         }
         if (!errno_ok) {
             printf("        " COLOR_TEXT(RED, "errno is %d, expected %d") "\n",
@@ -888,9 +885,9 @@ static int string_split_test_examples(const char *cstr, size_t len,
         }
         if (!str_list_ok) {
             printf("        " RED "returned list ");
-            string_list_debug_print(strs, num_strs);
+            string_list_debug_print(strs);
             printf(", expected ");
-            string_list_debug_print(expected_list, list_len);
+            string_list_debug_print(expected_list);
             printf(END_COLOR "\n");
         }
     }
@@ -1049,12 +1046,16 @@ static int string_append_test() {
     return tally_test_results(test_results, num_tests);
 }
 
-static String *create_string_list(const char **strs, size_t *lens, size_t list_len) {
-    String *list = malloc(list_len * sizeof(String));
+static StringList *create_string_list(const char **strs, size_t *lens,
+                                      size_t list_len) {
+    StringList *list = malloc(sizeof(StringList));
+
+    list->strs = malloc(list_len * sizeof(String));
+    list->len = list_len;
 
     size_t i;
     for (i = 0; i < list_len; i++) {
-        String *s = &list[i];
+        String *s = &list->strs[i];
 
         s->len = lens[i];
         s->chars = malloc(s->len);
@@ -1064,50 +1065,51 @@ static String *create_string_list(const char **strs, size_t *lens, size_t list_l
     return list;
 }
 
-static void free_string_list(String *list, size_t list_len) {
+static void free_string_list(StringList *list) {
     size_t i;
-    for (i = 0; i < list_len; i++) {
-        String *s = &list[i];
+    for (i = 0; i < list->len; i++) {
+        String *s = &list->strs[i];
         free(s->chars);
     }
 
+    free(list->strs);
     free(list);
 }
 
 static int string_split_test() {
     const char *empty_strs[] = {"", ""};
     size_t zeroes[] = {0,0};
-    String *two_empty = create_string_list(empty_strs, zeroes, 2);
+    StringList *two_empty = create_string_list(empty_strs, zeroes, 2);
 
     const char *words[] = {"list", "of", "words"};
     size_t word_lens[] = {4, 2, 5};
-    String *list_of_words = create_string_list(words, word_lens, 3);
+    StringList *list_of_words = create_string_list(words, word_lens, 3);
 
     const char *wads[] = {"w", "a", "d", "s"};
     size_t ones[] = {1, 1, 1, 1};
-    String *wads_list = create_string_list(wads, ones, 4);
+    StringList *wads_list = create_string_list(wads, ones, 4);
 
     const char *empty[] = {""};
     size_t zero[] = {0};
-    String *empty_str = create_string_list(empty, zero, 1);
+    StringList *empty_str = create_string_list(empty, zero, 1);
 
     int test_results[] = {
         /* only testing examples bc properties are a little convoluted */
         /* doing examples only is just a lot more straightforward */
-        string_split_test_examples(NULL, 0, ",", 1, NULL, 0, EFAULT),
-        string_split_test_examples("wads", 4, NULL, 0, NULL, 0, EFAULT),
-        string_split_test_examples("word", 4, "bigger", 6, NULL, 0, EINVAL),
-        string_split_test_examples("wads", 4, "wads", 4, two_empty, 2, 0),
-        string_split_test_examples("list, of, words", 15, ", ", 2, list_of_words, 3, 0),
-        string_split_test_examples("list of words", 13, " ", 1, list_of_words, 3, 0),
-        string_split_test_examples("wads", 4, "", 0, wads_list, 4, 0),
-        string_split_test_examples("", 0, "", 0, empty_str, 1, 0),
+        string_split_test_examples(NULL, 0, ",", 1, NULL, EFAULT),
+        string_split_test_examples("wads", 4, NULL, 0, NULL, EFAULT),
+        string_split_test_examples("word", 4, "bigger", 6, NULL, EINVAL),
+        string_split_test_examples("wads", 4, "wads", 4, two_empty, 0),
+        string_split_test_examples("list, of, words", 15, ", ", 2, list_of_words, 0),
+        string_split_test_examples("list of words", 13, " ", 1, list_of_words, 0),
+        string_split_test_examples("wads", 4, "", 0, wads_list, 0),
+        string_split_test_examples("", 0, "", 0, empty_str, 0),
     };
 
-    free_string_list(two_empty, 2);
-    free_string_list(list_of_words, 3);
-    free_string_list(wads_list, 4);
-    free_string_list(empty_str, 1);
+    free_string_list(two_empty);
+    free_string_list(list_of_words);
+    free_string_list(wads_list);
+    free_string_list(empty_str);
 
     int num_tests = sizeof(test_results) / sizeof(int);
     return tally_test_results(test_results, num_tests);

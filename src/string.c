@@ -399,8 +399,8 @@ static String *create_string_splits(const String *str, size_t num_strs,
     return strs;
 }
 
-String *string_split(const String *str, const String *delim, size_t *num_strs) {
-    if (str == NULL || delim == NULL || num_strs == NULL) {
+StringList *string_split(const String *str, const String *delim) {
+    if (str == NULL || delim == NULL) {
         errno = EFAULT;
         return NULL;
     }
@@ -418,10 +418,16 @@ String *string_split(const String *str, const String *delim, size_t *num_strs) {
         return NULL;
     }
 
-    /* always 1 more string than total instances of delimeter */
-    *num_strs = num_delims + 1;
+    StringList *list = malloc(sizeof(StringList));
+    if (list == NULL) {
+        errno = ENOMEM;
+        return NULL;
+    }
 
-    String *strs = create_string_splits(str, *num_strs, delim->len,
+    /* always 1 more string than total instances of delimeter */
+    list->len = num_delims + 1;
+
+    String *strs = create_string_splits(str, list->len, delim->len,
                                         delim_locations, num_delims);
     if (strs == NULL) {
         free(delim_locations);
@@ -429,6 +435,8 @@ String *string_split(const String *str, const String *delim, size_t *num_strs) {
         return NULL;
     }
 
+    list->strs = strs;
+
     free(delim_locations);
-    return strs;
+    return list;
 }
