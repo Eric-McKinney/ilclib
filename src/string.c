@@ -480,3 +480,41 @@ StringList *string_split(const String *str, const String *delim) {
     free(delim_locations);
     return list;
 }
+
+String *string_join(const String *delim, const StringList *list) {
+    if (delim == NULL || list == NULL) {
+        errno = EFAULT;
+        return NULL;
+    }
+
+    String *joined = malloc(sizeof(String));
+    if (joined == NULL) {
+        errno = ENOMEM;
+        return NULL;
+    }
+
+    joined->chars = NULL;  /* NULL works with string_append (realloc) */
+    joined->len = 0;
+
+    size_t i;
+    for (i = 0; i < list->len; i++) {
+        const String *s = &list->strs[i];
+        int append_result;
+
+        if (i != 0) {
+            append_result = string_append(joined, delim);
+            if (append_result != 0) {  /* errno already set by append */
+                free_string(joined);
+                return NULL;
+            }
+        }
+
+        append_result = string_append(joined, s);
+        if (append_result != 0) {  /* errno already set by append */
+            free_string(joined);
+            return NULL;
+        }
+    }
+
+    return joined;
+}

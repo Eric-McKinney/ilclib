@@ -30,7 +30,6 @@ int string_append(String *str, const String *to_append);
 int string_list_equal(const StringList *list1, const StringList *list2);
 void string_list_debug_print(const StringList *list);
 StringList *string_split(const String *str, const String *delim);
-
-// TODO: String *string_join(const String *delim, const StringList *strs);
+String *string_join(const String *delim, const StringList *list);
 
 #endif
