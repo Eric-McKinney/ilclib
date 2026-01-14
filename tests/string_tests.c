@@ -870,6 +870,50 @@ static int string_split_test_examples(const char *cstr, size_t len,
     return test_ok;
 }
 
+static int string_join_test_examples(const char *cdelim, size_t delim_len,
+                                     const StringList *list,
+                                     const char *cexpected, size_t expected_len,
+                                     int expected_errno) {
+    String *delim = create_string(cdelim, delim_len);
+    String *expected = create_string(cexpected, expected_len);
+
+    errno = 0;
+
+    String *joined = string_join(delim, list);
+    int errno_val = errno;
+
+    int str_ok = (errno == 0) ? string_equal(joined, expected) : 1;
+    int errno_ok = errno_val == expected_errno;
+    int test_ok = str_ok && errno_ok;
+
+    if (VERBOSE) {
+        const char *result = test_ok ?
+            COLOR_TEXT(GREEN, "passed") :
+            COLOR_TEXT(RED, "failed");
+        printf("    string_join(\"%s\", ", cdelim);
+        string_list_debug_print(list);
+        printf(") %s\n", result);
+
+        if (!str_ok) {
+            printf("        " RED "result is ");
+            string_debug_print(joined);
+            printf(", expected ");
+            string_debug_print(expected);
+            printf(END_COLOR "\n");
+        }
+        if (!errno_ok) {
+            printf("        " COLOR_TEXT(RED, "errno is %d, expected %d") "\n",
+                   errno_val, expected_errno);
+        }
+    }
+
+    free_string(delim);
+    free_string(expected);
+    free_string(joined);
+
+    return test_ok;
+}
+
 
 static int tally_test_results(int *results, int num_tests) {
     int final_result = 1;
@@ -1086,6 +1130,45 @@ static int string_split_test() {
     return tally_test_results(test_results, num_tests);
 }
 
+static int string_join_test() {
+    const char *words[] = {"list", "of", "words"};
+    size_t word_lens[] = {4, 2, 5};
+    StringList *list_of_words = create_string_list(words, word_lens, 3);
+
+    StringList *empty_list = create_string_list(words, word_lens, 0);
+
+    const char *wads[] = {"wads"};
+    size_t wads_len[] = {4};
+    StringList *single_word_list = create_string_list(wads, wads_len, 1);
+
+    StringList *two_word_list = create_string_list(words, word_lens, 2);
+
+    int test_results[] = {
+        string_join_test_examples(NULL, 0, NULL, "", 0, EFAULT),
+        string_join_test_examples("", 0, NULL, "", 0, EFAULT),
+        string_join_test_examples("", 0, NULL, "", 0, EFAULT),
+        string_join_test_examples(NULL, 0, list_of_words, "", 0, EFAULT),
+        string_join_test_examples("", 0, list_of_words, "listofwords", 11, 0),
+        string_join_test_examples(" ", 1, list_of_words, "list of words", 13, 0),
+        string_join_test_examples(", ", 2, list_of_words, "list, of, words", 15, 0),
+        string_join_test_examples("", 0, empty_list, "", 0, 0),
+        string_join_test_examples(",", 1, empty_list, "", 0, 0),
+        string_join_test_examples("", 0, single_word_list, "wads", 4, 0),
+        string_join_test_examples(".", 1, single_word_list, "wads", 4, 0),
+        string_join_test_examples("", 0, two_word_list, "listof", 6, 0),
+        string_join_test_examples("_", 1, two_word_list, "list_of", 7, 0),
+        string_join_test_examples(" go", 3, two_word_list, "list goof", 9, 0),
+    };
+
+    free_string_list(list_of_words);
+    free_string_list(empty_list);
+    free_string_list(single_word_list);
+    free_string_list(two_word_list);
+
+    int num_tests = sizeof(test_results) / sizeof(int);
+    return tally_test_results(test_results, num_tests);
+}
+
 int main(int argc, char **argv) {
     if (argc == 2) {
         if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--verbose") == 0) {
@@ -1118,6 +1201,7 @@ int main(int argc, char **argv) {
     suite_add_test(string_tests, "string concat", string_concat_test);
     suite_add_test(string_tests, "string append", string_append_test);
     suite_add_test(string_tests, "string split", string_split_test);
+    suite_add_test(string_tests, "string join", string_join_test);
     run_test_suite(string_tests, VERBOSE);
     free_test_suite(string_tests);
 
