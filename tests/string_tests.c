@@ -844,7 +844,7 @@ static int string_split_test_examples(const char *cstr, size_t len,
         const char *result = test_ok ?
             COLOR_TEXT(GREEN, "passed") :
             COLOR_TEXT(RED, "failed");
-        printf("    string_split(\"%s\", \"%s\", &num_strs) %s\n", cstr, cdelim, result);
+        printf("    string_split(\"%s\", \"%s\") %s\n", cstr, cdelim, result);
 
         if (!num_strs_ok) {
             printf("        " COLOR_TEXT(RED, "string list length is %lu, expected %lu") "\n",
