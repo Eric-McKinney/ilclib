@@ -400,6 +400,45 @@ static String *create_string_splits(const String *str, size_t num_strs,
     return strs;
 }
 
+int string_list_equal(const StringList *list1, const StringList *list2) {
+    if (list1 == NULL || list2 == NULL) {
+        errno = EFAULT;  /* same logic as in string_equal */
+        return 0;
+    }
+
+    if (list1->len != list2->len) {
+        return 0;
+    }
+
+    size_t i;
+    for (i = 0; i < list1->len; i++) {
+        if (!string_equal(&list1->strs[i], &list2->strs[i])) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+void string_list_debug_print(const StringList *list) {
+    if (list == NULL) {
+        printf("NULL");
+        return;
+    }
+
+    printf("{len: %lu, {", list->len);
+
+    size_t i;
+    for (i = 0; i < list->len; i++) {
+        if (i != 0) {
+            printf(", ");
+        }
+        string_debug_print(&list->strs[i]);
+    }
+
+    printf("}}");
+}
+
 StringList *string_split(const String *str, const String *delim) {
     if (str == NULL || delim == NULL) {
         errno = EFAULT;

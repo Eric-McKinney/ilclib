@@ -823,35 +823,6 @@ static int string_append_test_examples(const char *cstr, size_t len,
     return test_ok;
 }
 
-static int string_lists_equal(const StringList *list1, const StringList *list2) {
-    if (list1->len != list2->len) {
-        return 0;
-    }
-
-    size_t i;
-    for (i = 0; i < list1->len; i++) {
-        if (!string_equal(&list1->strs[i], &list2->strs[i])) {
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
-static void string_list_debug_print(const StringList *list) {
-    printf("{");
-
-    size_t i;
-    for (i = 0; i < list->len; i++) {
-        if (i != 0) {
-            printf(", ");
-        }
-        string_debug_print(&list->strs[i]);
-    }
-
-    printf("}");
-}
-
 static int string_split_test_examples(const char *cstr, size_t len,
                                       const char *cdelim, size_t delim_len,
                                       const StringList *expected_list,
@@ -866,7 +837,7 @@ static int string_split_test_examples(const char *cstr, size_t len,
 
     int num_strs_ok = (errno_val == 0) ? strs->len == expected_list->len : 1;
     int errno_ok = errno_val == expected_errno;
-    int str_list_ok = (errno_val == 0) ? string_lists_equal(strs, expected_list) : 1;
+    int str_list_ok = (errno_val == 0) ? string_list_equal(strs, expected_list) : 1;
     int test_ok = num_strs_ok && errno_ok && str_list_ok;
 
     if (VERBOSE) {
