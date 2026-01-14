@@ -4,6 +4,7 @@
 #include <ilc/string.h>
 
 
+/* don't want to add string.h as dependency bc I'm stubborn */
 static void mem_copy(void *dest, const void *src, size_t size) {
     size_t i;
     for (i = 0; i < size; i++) {
