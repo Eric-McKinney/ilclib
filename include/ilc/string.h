@@ -171,4 +171,6 @@ void string_list_debug_print(const StringList *list);
 StringList *string_split(const String *str, const String *delim);
 String *string_join(const String *delim, const StringList *list);
 
+// TODO: trim, ltrim, rtrim
+
 #endif
