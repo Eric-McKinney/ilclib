@@ -14,6 +14,3 @@
 
 note: if writing tests gets to be a bit boring, then write some little
 mini-programs that do nothing but demo the functions
-
-
-also note: investigate/research single file library file organization
