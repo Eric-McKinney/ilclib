@@ -162,12 +162,124 @@ void string_print(const String *str);
  * Returns: nothing.
  */
 void string_debug_print(const String *str);
+
+
+/*
+ * Check if the given string (str) contains another string (substr).
+ *
+ * For a string to be contained by another string it must be a substring of
+ * that string. The arguments can be any two strings. The parameter names str
+ * and substr are only to make it clear which string is being checked for being
+ * contained.
+ *
+ * Every string contains the empty string because substring(str, 0, 0) will
+ * return the empty string for any string. Note that a NULL pointer is not
+ * considered a string.
+ *
+ * Errors (errno values):
+ *   EFAULT: str, substr, or both were NULL
+ *
+ * Returns: 1 if str contains substr, 0 if it doesn't.
+ */
 int string_contains(const String *str, const String *substr);
+
+
+/*
+ * Check if the given string (str) contains another string (substr) and write
+ * the index where the first instance of substr is found within str to the
+ * given size_t pointer (idx). If the given size_t pointer (idx) is NULL, then
+ * it will be ignored.
+ *
+ * For a string to be contained by another string it must be a substring of
+ * that string. The arguments can be any two strings. The parameter names str
+ * and substr are only to make it clear which string is being checked for being
+ * contained.
+ *
+ * Every string contains the empty string at index 0 because
+ * substring(str, 0, 0) will return the empty string for any string. Note that
+ * a NULL pointer is not considered a string.
+ *
+ * Errors (errno values):
+ *   EFAULT: str, substr, or both were NULL
+ *
+ * Returns: 1 if str contains substr, 0 if it doesn't.
+ */
 int string_contains_at(const String *str, const String *substr, size_t *idx);
+
+
+/*
+ * Create a new string which has the characters of the first string followed by
+ * the characters of the second string.
+ *
+ * Errors (errno values):
+ *   EFAULT: first, second, or both were NULL
+ *   ENOMEM: failed to allocate space (no memory)
+ *
+ * Returns: a pointer to the new string on success, NULL on failure.
+ */
 String *string_concat(const String *first, const String *second);
+
+
+/*
+ * Append the characters of the string to_append to the string str.
+ *
+ * Errors (errno values):
+ *   EFAULT: str, to_append, or both were NULL
+ *   ENOMEM: failed to allocate space (no memory)
+ *
+ * Returns: 0 on success, errno of error on failure (errno is set too).
+ */
 int string_append(String *str, const String *to_append);
+
+
+/*
+ * Check if two string lists are equal. String lists are considered equal if
+ * their lengths are the same and each list has the same sequence of strings.
+ *
+ * Errors (errno values):
+ *   EFAULT: list1, list2, or both were NULL
+ *
+ * Returns: 1 if the lists are equal, 0 if they are not equal.
+ */
 int string_list_equal(const StringList *list1, const StringList *list2);
+
+
+/*
+ * Print the list's strings and length in the following format:
+ * {len: 2, strs: [{chars: "example", len: 7}, {chars: "list", len: 4}]}
+ *
+ * If the list is NULL, then NULL will be printed.
+ *
+ * No errors are possible.
+ *
+ * Returns: nothing.
+ */
 void string_list_debug_print(const StringList *list);
+
+
+/*
+ * Split a string into a string list by a given delimeter. The list will
+ * consist of the substrings from beginning to end of the string around all
+ * instances of the delimeter. The chars of each string in the list are not
+ * distinct buffers, instead pointing to locations in the original string's
+ * chars buffer. This means that the string list created by this function can
+ * be freed by one call to free(). It also means that the original string
+ * should not be freed before the string list is freed.
+ *
+ * If the delimeter occurs at the beginning, end, or immediately after another
+ * instance of the delimeter, the list will contain an empty string in that
+ * location.
+ *
+ * ex: string_split(",,", ",") results in the list
+ * ["", "", ""]
+ *
+ * Errors (errno values):
+ *   EFAULT: str, delim, or both were NULL
+ *   EINVAL: the delimeter is longer than the string to split
+ *   ENOMEM: failed to allocate space (no memory)
+ *
+ * Returns: a pointer to the string list on success, NULL on failure.
+ */
 StringList *string_split(const String *str, const String *delim);
 String *string_join(const String *delim, const StringList *list);
 
