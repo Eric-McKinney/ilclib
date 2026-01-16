@@ -382,6 +382,42 @@ static int substring_test_examples(const char *cstr, size_t len,
     return expectation_met;
 }
 
+static int string_equal_test_examples(const char *cstr1, size_t len1,
+                                      const char *cstr2, size_t len2,
+                                      int expected_ret, int expected_errno) {
+    String *str1 = create_string(cstr1, len1);
+    String *str2 = create_string(cstr2, len2);
+
+    errno = 0;
+
+    int equal = string_equal(str1, str2);
+    int errno_val = errno;
+
+    int ret_ok = equal == expected_ret;
+    int errno_ok = errno_val == expected_errno;
+    int test_ok = ret_ok && errno_ok;
+
+    if (VERBOSE) {
+        const char *result = test_ok ?
+            COLOR_TEXT(GREEN, "passed") :
+            COLOR_TEXT(RED, "failed");
+        printf("    string_equal(\"%s\", \"%s\") %s\n", cstr1, cstr2, result);
+
+        if (!ret_ok) {
+            printf("        returned %d, expected %d\n", equal, expected_ret);
+        }
+        if (!errno_ok) {
+            printf("        errno was %d, expected %d\n",
+                   errno_val, expected_errno);
+        }
+    }
+
+    free_string(str1);
+    free_string(str2);
+
+    return test_ok;
+}
+
 static int string_contains_prop_helper(const char *prop_name,
                                        const String *str, const String *test,
                                        int expected_ret, int expected_errno) {
@@ -992,6 +1028,22 @@ static int substring_test() {
     return tally_test_results(test_results, num_tests);
 }
 
+static int string_equal_test() {
+    int test_results[] = {
+        string_equal_test_examples(NULL, 0, "abc", 3, 0, EFAULT),
+        string_equal_test_examples("abc", 3, NULL, 0, 0, EFAULT),
+        string_equal_test_examples(NULL, 0, NULL, 0, 0, EFAULT),
+        string_equal_test_examples("abc", 3, "abc", 3, 1, 0),
+        string_equal_test_examples("abc", 3, "abb", 3, 0, 0),
+        string_equal_test_examples("", 0, "", 0, 1, 0),
+        string_equal_test_examples("a", 1, "", 0, 0, 0),
+        string_equal_test_examples("", 0, "a", 1, 0, 0),
+    };
+
+    int num_tests = sizeof(test_results) / sizeof(int);
+    return tally_test_results(test_results, num_tests);
+}
+
 static int string_contains_test() {
     int test_results[] = {
         /*
@@ -1197,6 +1249,7 @@ int main(int argc, char **argv) {
     suite_add_test(string_tests, "copy string", string_copy_test);
     suite_add_test(string_tests, "reverse string", string_reverse_test);
     suite_add_test(string_tests, "substring", substring_test);
+    suite_add_test(string_tests, "string_equal", string_equal_test);
     suite_add_test(string_tests, "string contains", string_contains_test);
     suite_add_test(string_tests, "string concat", string_concat_test);
     suite_add_test(string_tests, "string append", string_append_test);
