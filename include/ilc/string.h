@@ -281,6 +281,22 @@ void string_list_debug_print(const StringList *list);
  * Returns: a pointer to the string list on success, NULL on failure.
  */
 StringList *string_split(const String *str, const String *delim);
+
+
+/*
+ * Join the strings in a string list by creating a new string which is a
+ * concatentation of the chars of each string in the order they appear in the
+ * list. The delimeter string's chars will be appended between each string's
+ * chars.
+ *
+ * To "ignore" the delimeter, use the empty string as a delimeter.
+ *
+ * Errors (errno values):
+ *   EFAULT: delim, list, or both were NULL
+ *   ENOMEM: failed to allocate space (no memory)
+ *
+ * Returns: a pointer to the joined string on success, NULL on failure.
+ */
 String *string_join(const String *delim, const StringList *list);
 
 // TODO: trim, ltrim, rtrim
