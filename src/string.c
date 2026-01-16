@@ -194,14 +194,16 @@ int string_compare(const String *str1, const String *str2) {
         }
     }
 
+    if (str1->len == str2->len) {
+        return 0;
+    }
+
     /* a longer string is "bigger" e.g. abc - abcd < 0 */
     if (shortest_len == str1->len) {
         return -1;
     } else {
         return 1;
     }
-
-    return 0;
 }
 
 void string_print(const String *str) {
