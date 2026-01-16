@@ -426,7 +426,7 @@ void string_list_debug_print(const StringList *list) {
         return;
     }
 
-    printf("{len: %lu, {", list->len);
+    printf("{len: %lu, strs: [", list->len);
 
     size_t i;
     for (i = 0; i < list->len; i++) {
@@ -436,7 +436,7 @@ void string_list_debug_print(const StringList *list) {
         string_debug_print(&list->strs[i]);
     }
 
-    printf("}}");
+    printf("]}");
 }
 
 StringList *string_split(const String *str, const String *delim) {
