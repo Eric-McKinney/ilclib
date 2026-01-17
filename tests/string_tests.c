@@ -404,10 +404,11 @@ static int string_equal_test_examples(const char *cstr1, size_t len1,
         printf("    string_equal(\"%s\", \"%s\") %s\n", cstr1, cstr2, result);
 
         if (!ret_ok) {
-            printf("        returned %d, expected %d\n", equal, expected_ret);
+            printf("        " COLOR_TEXT(RED, "returned %d, expected %d") "\n",
+                   equal, expected_ret);
         }
         if (!errno_ok) {
-            printf("        errno was %d, expected %d\n",
+            printf("        " COLOR_TEXT(RED, "errno was %d, expected %d") "\n",
                    errno_val, expected_errno);
         }
     }
@@ -440,10 +441,11 @@ static int string_compare_test_examples(const char *cstr1, size_t len1,
         printf("    string_compare(\"%s\", \"%s\") %s\n", cstr1, cstr2, result);
 
         if (!ret_ok) {
-            printf("        returned %d, expected %d\n", ret, expected_ret);
+            printf("        " COLOR_TEXT(RED, "returned %d, expected %d") "\n",
+                   ret, expected_ret);
         }
         if (!errno_ok) {
-            printf("        errno was %d, expected %d\n",
+            printf("        " COLOR_TEXT(RED, "errno was %d, expected %d") "\n",
                    errno_val, expected_errno);
         }
     }
