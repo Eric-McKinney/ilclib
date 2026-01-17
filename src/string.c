@@ -520,3 +520,44 @@ String *string_join(const String *delim, const StringList *list) {
 
     return joined;
 }
+
+static size_t find_start_after_trim(const String *str, const StringList *to_trim) {
+    size_t start_after_trim = 0;
+
+    size_t i = 0, misses = 0;
+    while (misses < to_trim->len) {
+        String *s = &to_trim->strs[i];
+
+        if (start_after_trim + s->len > str->len) {
+            misses++;
+            i = (i + 1) % to_trim->len;
+            continue;
+        }
+
+        size_t j;
+        for (j = start_after_trim; j <= str->len - s->len; j++) {
+            if (bounded_string_equal(str, s, j)) {
+                misses = 0;
+                start_after_trim += s->len;
+                j += s->len - 1;  /* -1 to account for j++ from for loop */
+            } else {
+                break;
+            }
+        }
+
+        misses++;
+        i = (i + 1) % to_trim->len;
+    }
+
+    return start_after_trim;
+}
+
+String *string_ltrim(const String *str, const StringList *to_trim) {
+    if (str == NULL || to_trim == NULL) {
+        errno = EFAULT;
+        return NULL;
+    }
+
+    size_t start = find_start_after_trim(str, to_trim);
+    return create_string(str->chars + start, str->len - start);
+}

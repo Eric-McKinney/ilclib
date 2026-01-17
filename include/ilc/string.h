@@ -299,6 +299,11 @@ StringList *string_split(const String *str, const String *delim);
  */
 String *string_join(const String *delim, const StringList *list);
 
-// TODO: trim, ltrim, rtrim
+
+String *string_ltrim(const String *str, const StringList *to_trim);
+
+// TODO:
+// String *string_trim(const String *str, const StringList *to_trim);
+// String *string_rtrim(const String *str, const StringList *to_trim);
 
 #endif
