@@ -988,6 +988,58 @@ static int string_join_test_examples(const char *cdelim, size_t delim_len,
     return test_ok;
 }
 
+static int string_trim_test_helper(String *(*trim)(const String *, const StringList *),
+                                   const char *trim_fn_name,
+                                   const char *cstr, size_t len,
+                                   const StringList *to_trim,
+                                   const char *cexpected, size_t expected_len,
+                                   int expected_errno) {
+    String *str = create_string(cstr, len);
+    String *expected = create_string(cexpected, expected_len);
+
+    errno = 0;
+
+    String *trimmed = trim(str, to_trim);
+    int errno_val = errno;
+
+    int str_ok = (errno_val == 0) ? string_equal(trimmed, expected) : 1;
+    int errno_ok = errno_val == expected_errno;
+    int test_ok = str_ok && errno_ok;
+
+    if (VERBOSE) {
+        const char *result = test_ok ?
+            COLOR_TEXT(GREEN, "passed") :
+            COLOR_TEXT(RED, "failed");
+        printf("    %s(\"%s\", ", trim_fn_name, cstr);
+        string_list_debug_print(to_trim);
+        printf(") %s\n", result);
+
+        if (!str_ok) {
+            printf("        " RED "returned ");
+            string_print(trimmed);
+            printf(", expected %s" END_COLOR "\n", cexpected);
+        }
+        if (!errno_ok) {
+            printf("        " COLOR_TEXT(RED, "errno was %d, expected %d") "\n",
+                   errno_val, expected_errno);
+        }
+    }
+
+    free_string(str);
+    free_string(trimmed);
+    free_string(expected);
+
+    return test_ok;
+}
+
+static int string_ltrim_test_examples(const char *cstr, size_t len,
+                                      const StringList *to_trim,
+                                      const char *cexpected, size_t expected_len,
+                                      int expected_errno) {
+    return string_trim_test_helper(string_ltrim, "string_ltrim",
+                                   cstr, len, to_trim, cexpected, expected_len,
+                                   expected_errno);
+}
 
 static int tally_test_results(int *results, int num_tests) {
     int final_result = 1;
@@ -1279,6 +1331,30 @@ static int string_join_test() {
     return tally_test_results(test_results, num_tests);
 }
 
+static int string_ltrim_test() {
+    const char *letters[] = {"a", "b", "c"};
+    size_t letter_lens[] = {1, 1, 1};
+    StringList *abc = create_string_list(letters, letter_lens, 3);
+
+    const char *space[] = {" "};
+    size_t one[] = {1};
+    StringList *one_space = create_string_list(space, one, 1);
+
+    int test_results[] = {
+        string_ltrim_test_examples(NULL, 0, one_space, NULL, 0, EFAULT),
+        string_ltrim_test_examples("wads", 4, NULL, NULL, 0, EFAULT),
+        string_ltrim_test_examples(NULL, 0, NULL, NULL, 0, EFAULT),
+        string_ltrim_test_examples("   wads  ", 9, one_space, "wads  ", 6, 0),
+        string_ltrim_test_examples("   wads", 7, one_space, "wads", 4, 0),
+        string_ltrim_test_examples("a  wads", 7, one_space, "a  wads", 7, 0),
+        string_ltrim_test_examples("abcabcwords hereabc", 19, abc, "words hereabc", 13, 0),
+        string_ltrim_test_examples("aabbccwords hereabc", 19, abc, "words hereabc", 13, 0),
+    };
+
+    int num_tests = sizeof(test_results) / sizeof(int);
+    return tally_test_results(test_results, num_tests);
+}
+
 int main(int argc, char **argv) {
     if (argc == 2) {
         if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--verbose") == 0) {
@@ -1314,6 +1390,7 @@ int main(int argc, char **argv) {
     suite_add_test(string_tests, "string append", string_append_test);
     suite_add_test(string_tests, "string split", string_split_test);
     suite_add_test(string_tests, "string join", string_join_test);
+    suite_add_test(string_tests, "string ltrim", string_ltrim_test);
     run_test_suite(string_tests, VERBOSE);
     free_test_suite(string_tests);
 
