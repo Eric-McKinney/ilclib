@@ -13,6 +13,37 @@ typedef struct {
     size_t len;
 } StringList;
 
+/****************************/
+/* FUNCTION QUICK REFERENCE */
+/****************************/
+
+/*
+ * String *create_string(const char *chars, size_t len)
+ * String *string_copy(const String *str)
+ * String *string_reverse(const String *str)
+ * void free_string(String *str)
+ * String *substring(const String *str, long start, long end)
+ * char *string_to_c_string(const String *str)
+ * int string_compare(const String *str1, const String *str2)
+ * void string_print(const String *str)
+ * void string_debug_print(const String *str)
+ * int string_contains(const String *str, const String *substr)
+ * int string_contains_at(const String *str, const String *substr, size_t *idx)
+ * String *string_concat(const String *first, const String *second)
+ * int string_append(String *str, const String *to_append)
+ * int string_list_equal(const StringList *list1, const StringList *list2)
+ * void string_list_print(const StringList *list)
+ * void string_list_debug_print(const StringList *list)
+ * StringList *string_split(const String *str, const String *delim)
+ * String *string_join(const String *delim, const StringList *list)
+ * String *string_ltrim(const String *str, const StringList *to_trim)
+ * String *string_rtrim(const String *str, const StringList *to_trim)
+ * String *string_trim(const String *str, const StringList *to_trim)
+ */
+
+/******************************************/
+/* FUNCTION DECLARATIONS AND DESCRIPTIONS */
+/******************************************/
 
 /*
  * Allocates a String struct and initializes it. The chars field will be
