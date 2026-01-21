@@ -602,3 +602,19 @@ String *string_rtrim(const String *str, const StringList *to_trim) {
     size_t end = find_end_after_trim(str, to_trim);
     return create_string(str->chars, end);
 }
+
+String *string_trim(const String *str, const StringList *to_trim) {
+    if (str == NULL || to_trim == NULL) {
+        errno = EFAULT;
+        return NULL;
+    }
+
+    size_t start = find_start_after_trim(str, to_trim);
+    size_t end = find_end_after_trim(str, to_trim);
+
+    if (end <= start) {
+        return create_string("", 0);
+    }
+
+    return substring(str, start, end);
+}
