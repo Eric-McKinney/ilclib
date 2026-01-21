@@ -313,12 +313,42 @@ StringList *string_split(const String *str, const String *delim);
 String *string_join(const String *delim, const StringList *list);
 
 
+/*
+ * Creates a new string where all consecutive instances of each string within
+ * to_trim are removed from the left side of the given string (str).
+ *
+ * Errors (errno values):
+ *   EFAULT: str, to_trim, or both were NULL
+ *   ENOMEM: failed to allocate space (no memory)
+ *
+ * Returns: a pointer to the new string on success, NULL on failure.
+ */
 String *string_ltrim(const String *str, const StringList *to_trim);
 
 
+/*
+ * Creates a new string where all consecutive instances of each string within
+ * to_trim are removed from the right side of the given string (str).
+ *
+ * Errors (errno values):
+ *   EFAULT: str, to_trim, or both were NULL
+ *   ENOMEM: failed to allocate space (no memory)
+ *
+ * Returns: a pointer to the new string on success, NULL on failure.
+ */
 String *string_rtrim(const String *str, const StringList *to_trim);
 
 
+/*
+ * Creates a new string where all consecutive instances of each string within
+ * to_trim are removed from the left and right sides of the given string (str).
+ *
+ * Errors (errno values):
+ *   EFAULT: str, to_trim, or both were NULL
+ *   ENOMEM: failed to allocate space (no memory)
+ *
+ * Returns: a pointer to the new string on success, NULL on failure.
+ */
 String *string_trim(const String *str, const StringList *to_trim);
 
 #endif
