@@ -1041,6 +1041,15 @@ static int string_ltrim_test_examples(const char *cstr, size_t len,
                                    expected_errno);
 }
 
+static int string_rtrim_test_examples(const char *cstr, size_t len,
+                                      const StringList *to_trim,
+                                      const char *cexpected, size_t expected_len,
+                                      int expected_errno) {
+    return string_trim_test_helper(string_rtrim, "string_rtrim",
+                                   cstr, len, to_trim, cexpected, expected_len,
+                                   expected_errno);
+}
+
 static int tally_test_results(int *results, int num_tests) {
     int final_result = 1;
     int i;
@@ -1355,6 +1364,30 @@ static int string_ltrim_test() {
     return tally_test_results(test_results, num_tests);
 }
 
+static int string_rtrim_test() {
+    const char *letters[] = {"a", "b", "c"};
+    size_t letter_lens[] = {1, 1, 1};
+    StringList *abc = create_string_list(letters, letter_lens, 3);
+
+    const char *space[] = {" "};
+    size_t one[] = {1};
+    StringList *one_space = create_string_list(space, one, 1);
+
+    int test_results[] = {
+        string_rtrim_test_examples(NULL, 0, one_space, NULL, 0, EFAULT),
+        string_rtrim_test_examples("wads", 4, NULL, NULL, 0, EFAULT),
+        string_rtrim_test_examples(NULL, 0, NULL, NULL, 0, EFAULT),
+        string_rtrim_test_examples("   wads  ", 9, one_space, "   wads", 7, 0),
+        string_rtrim_test_examples("   wads", 7, one_space, "   wads", 7, 0),
+        string_rtrim_test_examples("wads  a", 7, one_space, "wads  a", 7, 0),
+        string_rtrim_test_examples("abcwords hereabcabc", 19, abc, "abcwords here", 13, 0),
+        string_rtrim_test_examples("abcwords hereaabbcc", 19, abc, "abcwords here", 13, 0),
+    };
+
+    int num_tests = sizeof(test_results) / sizeof(int);
+    return tally_test_results(test_results, num_tests);
+}
+
 int main(int argc, char **argv) {
     if (argc == 2) {
         if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--verbose") == 0) {
@@ -1391,6 +1424,7 @@ int main(int argc, char **argv) {
     suite_add_test(string_tests, "string split", string_split_test);
     suite_add_test(string_tests, "string join", string_join_test);
     suite_add_test(string_tests, "string ltrim", string_ltrim_test);
+    suite_add_test(string_tests, "string rtrim", string_rtrim_test);
     run_test_suite(string_tests, VERBOSE);
     free_test_suite(string_tests);
 
