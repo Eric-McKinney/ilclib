@@ -208,7 +208,7 @@ int string_compare(const String *str1, const String *str2) {
 
 void string_print(const String *str) {
     if (str == NULL) {
-        errno = EFAULT;
+        printf("(null)");
         return;
     }
 
@@ -220,7 +220,7 @@ void string_print(const String *str) {
 
 void string_debug_print(const String *str) {
     if (str == NULL) {
-        printf("NULL");
+        printf("(null)");
         return;
     }
 
@@ -422,9 +422,29 @@ int string_list_equal(const StringList *list1, const StringList *list2) {
     return 1;
 }
 
+void string_list_print(const StringList *list) {
+    if (list == NULL) {
+        printf("(null)");
+        return;
+    }
+
+    printf("[");
+
+    size_t i;
+    for (i = 0; i < list->len; i++) {
+        if (i != 0) {
+            printf(", ");
+        }
+
+        string_print(&list->strs[i]);
+    }
+
+    printf("]");
+}
+
 void string_list_debug_print(const StringList *list) {
     if (list == NULL) {
-        printf("NULL");
+        printf("(null)");
         return;
     }
 

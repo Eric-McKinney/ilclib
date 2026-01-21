@@ -143,8 +143,9 @@ int string_compare(const String *str1, const String *str2);
 /*
  * Print the characters of the string to stdout.
  *
- * Errors (errno values):
- *   EFAULT: the str argument was NULL
+ * If the str argument is NULL, then (null) will be printed.
+ *
+ * No errors possible.
  *
  * Returns: nothing.
  */
@@ -155,7 +156,7 @@ void string_print(const String *str);
  * Print the string's characters and length in the following format:
  * {chars: "str characters", len: 14}
  *
- * If the str argument is NULL, then NULL will be printed.
+ * If the str argument is NULL, then (null) will be printed.
  *
  * No errors possible.
  *
@@ -245,10 +246,22 @@ int string_list_equal(const StringList *list1, const StringList *list2);
 
 
 /*
+ * Print the characters of each string in the list to stdout within brackets and
+ * separated by a comma and a space.
+ *
+ * If the list argument is NULL, then (null) will be printed.
+ *
+ * No errors possible.
+ *
+ * Returns: nothing.
+ */
+void string_list_print(const StringList *list);
+
+/*
  * Print the list's strings and length in the following format:
  * {len: 2, strs: [{chars: "example", len: 7}, {chars: "list", len: 4}]}
  *
- * If the list is NULL, then NULL will be printed.
+ * If the list is NULL, then (null) will be printed.
  *
  * No errors are possible.
  *
