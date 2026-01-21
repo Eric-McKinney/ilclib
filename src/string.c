@@ -552,6 +552,37 @@ static size_t find_start_after_trim(const String *str, const StringList *to_trim
     return start_after_trim;
 }
 
+static size_t find_end_after_trim(const String *str, const StringList *to_trim) {
+    size_t end_after_trim = str->len;
+
+    size_t i = 0, misses = 0;
+    while (misses < to_trim->len) {
+        String *s = &to_trim->strs[i];
+
+        if (end_after_trim - s->len < 0) {
+            misses++;
+            i = (i + 1) % to_trim->len;
+            continue;
+        }
+
+        size_t j;
+        for (j = end_after_trim - s->len; j >= 0; j--) {
+            if (bounded_string_equal(str, s, j)) {
+                misses = 0;
+                end_after_trim -= s->len;
+                j -= s->len - 1;  /* +1 to account for j-- from for loop */
+            } else {
+                break;
+            }
+        }
+
+        misses++;
+        i = (i + 1) % to_trim->len;
+    }
+
+    return end_after_trim;
+}
+
 String *string_ltrim(const String *str, const StringList *to_trim) {
     if (str == NULL || to_trim == NULL) {
         errno = EFAULT;
@@ -560,4 +591,14 @@ String *string_ltrim(const String *str, const StringList *to_trim) {
 
     size_t start = find_start_after_trim(str, to_trim);
     return create_string(str->chars + start, str->len - start);
+}
+
+String *string_rtrim(const String *str, const StringList *to_trim) {
+    if (str == NULL || to_trim == NULL) {
+        errno = EFAULT;
+        return NULL;
+    }
+
+    size_t end = find_end_after_trim(str, to_trim);
+    return create_string(str->chars, end);
 }
