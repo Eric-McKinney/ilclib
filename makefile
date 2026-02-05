@@ -9,10 +9,10 @@ OBJ=$(BIN)/obj
 TEST_SRC=tests
 TEST_BIN=$(BIN)/tests
 
-_LIB_OBJS=libstring.so libtest.so
+_LIB_OBJS=libstring.so libtest.so libdynarray.so
 LIB_OBJS=$(patsubst %,$(OBJ)/%,$(_LIB_OBJS))
 
-_TESTS=string_tests
+_TESTS=string_tests dynarray_example
 TESTS=$(patsubst %,$(TEST_BIN)/%,$(_TESTS))
 
 .PHONY: all clean test
@@ -28,10 +28,19 @@ $(OBJ)/libtest.so: $(SRC)/test.c $(INCLUDE)/ilc/test.h
 $(OBJ)/libstring.so: $(SRC)/string.c $(INCLUDE)/ilc/string.h
 	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
 
+$(OBJ)/libdynarray.so: $(SRC)/dynarray.c $(INCLUDE)/ilc/dynarray.h
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
+
 $(TEST_BIN)/string_tests: $(OBJ)/string_tests.o $(OBJ)/libstring.so $(OBJ)/libtest.so
 	$(CC) $(LDFLAGS) -o $@ $< -lstring -ltest
 
 $(OBJ)/string_tests.o: $(TEST_SRC)/string_tests.c $(INCLUDE)/ilc/string.h $(INCLUDE)/ilc/test.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(TEST_BIN)/dynarray_example: $(OBJ)/dynarray_example.o $(OBJ)/libdynarray.so
+	$(CC) $(LDFLAGS) -o $@ $< -ldynarray
+
+$(OBJ)/dynarray_example.o: $(TEST_SRC)/dynarray_example.c $(INCLUDE)/ilc/dynarray.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(OBJ):
