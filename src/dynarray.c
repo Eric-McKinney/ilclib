@@ -156,8 +156,8 @@ int dynarray_replace(DynArray *arr, const void *to_replace, const void *new_item
     size_t i;
     for (i = 0; i < arr->length; i++) {
         void *curr = (char *)arr->contents + i * arr->item_size;
-        if (equal(curr, item)) {
-            memcpy(curr, item, arr->item_size);
+        if (equal(curr, to_replace)) {
+            memcpy(curr, new_item, arr->item_size);
 
             if (!replace_all) {
                 return 0;
@@ -179,7 +179,7 @@ int dynarray_replace_at(DynArray *arr, size_t index, const void *new_item) {
         return EINVAL;
     }
 
-    void *to_replace = arr->contents + index * arr->item_size;
+    void *to_replace = (char *)arr->contents + index * arr->item_size;
     memcpy(to_replace, new_item, arr->item_size);
 
     return 0;
