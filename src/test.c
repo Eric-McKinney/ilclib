@@ -2,12 +2,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <errno.h>
 #include <ilc/test.h>
 
-typedef struct {
-    const char *name;
-    int (*run)();
-} Test;
 
 struct _test_suite {
     const char *name;
@@ -42,18 +39,21 @@ void free_test_suite(TestSuite *suite) {
     free(suite);
 }
 
-static Test *create_test(const char *name, int (*run)()) {
+static Test *create_test(const char *name, int (*run)(const void *), const void *input) {
     if (name == NULL || run == NULL) {
+        errno = EFAULT;
         return NULL;
     }
 
     Test *test = malloc(sizeof(Test));
     test->name = name;  /* name should be a string literal in scope as long as the test suite it belongs to */
     test->run = run;
+    test->input = input;
     return test;
 }
 
-void suite_add_test(TestSuite *suite, const char *test_name, int (*run)()) {
+void suite_add_test(TestSuite *suite, const char *test_name, int (*run)(const void *),
+                    const void *input) {
     suite->num_tests++;
     suite->tests = realloc(suite->tests, suite->num_tests * sizeof(Test *));
 
@@ -62,7 +62,7 @@ void suite_add_test(TestSuite *suite, const char *test_name, int (*run)()) {
         exit(EXIT_FAILURE);
     }
 
-    suite->tests[suite->num_tests - 1] = create_test(test_name, run);
+    suite->tests[suite->num_tests - 1] = create_test(test_name, run, input);
 }
 
 void run_test_suite(TestSuite *suite, int verbose) {
@@ -104,7 +104,8 @@ void run_test_suite(TestSuite *suite, int verbose) {
                 test_result = FAILURE;
             }
         } else {  /* child */
-            test_result = suite->tests[i]->run();
+            const void *test_input = suite->tests[i]->input;
+            test_result = suite->tests[i]->run(test_input);
             free_test_suite(suite);  /* not strictly necessary, but makes finding real memory leaks easier */
             exit(test_result);
         }
