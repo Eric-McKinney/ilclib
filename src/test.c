@@ -15,6 +15,7 @@ struct _test_suite {
 
 TestSuite *create_test_suite(const char *name) {
     if (name == NULL) {
+        errno = EFAULT;
         return NULL;
     }
 
@@ -28,6 +29,10 @@ TestSuite *create_test_suite(const char *name) {
 
 void free_test_suite(TestSuite *suite) {
     unsigned int i;
+
+    if (suite == NULL) {
+        return;
+    }
 
     for (i = 0; i < suite->num_tests; i++) {
         free(suite->tests[i]);
