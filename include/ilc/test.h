@@ -143,9 +143,11 @@ void handle_cmdline_args(int argc, char **argv) {
 }
 
 #define RUN_TESTS(...) \
+do { \
     Test tests[] = { __VA_ARGS__ }; \
     size_t ntests = sizeof(tests) / sizeof(Test); \
     __ilc_test_main__(tests, ntests); \
+} while(0);
 
 #define TEST_SUITE(suite_name) \
 static void __ilc_test_main__(Test *tests, size_t ntests) { \
