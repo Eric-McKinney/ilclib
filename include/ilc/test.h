@@ -142,6 +142,40 @@ void handle_cmdline_args(int argc, char **argv) {
     }
 }
 
+/*
+ * Given a comma-separated list of Test structs, run them in children processes.
+ *
+ * Notes:
+ *   Must use the TEST_SUITE macro (defined below) above this macro in the file.
+ *   Must use this macro within a function (e.g. your main function).
+ *   Do not put a semicolon after the macro (see example below).
+ *   When listing Test structs, the last one can have a comma too (see example).
+ *
+ * Additional notes for the curious:
+ *   The do-while is for scoping, so RUN_TESTS can be used like a function call.
+ *   This macro doesn't "swallow the semi-colon" to be consistent w/TEST_SUITE.
+ *
+ * ex:
+ *
+ * #include <ilc/test.h>
+ *
+ * TEST_SUITE("my awesome tests")
+ *
+ * int test_is_four(const void *input) {
+ *     int arg = *((int *) input);
+ *     return (arg == 4) ? SUCCESS : FAILURE;
+ * }
+ *
+ * int main() {
+ *     int x = 4;
+ *     int y = 7;
+ *
+ *     RUN_TESTS(
+ *         {"x is four", test_is_four, &x},
+ *         {"y is four", test_is_four, &y},
+ *     )
+ * }
+ */
 #define RUN_TESTS(...) \
 do { \
     Test tests[] = { __VA_ARGS__ }; \
@@ -149,6 +183,21 @@ do { \
     __ilc_test_main__(tests, ntests); \
 } while(0);
 
+/*
+ * Declares a test suite with the given name (wrapped in quotes).
+ *
+ * Notes:
+ *   Use this macro at the top of the file or at least above RUN_TESTS.
+ *   Must use this macro outside of a function.
+ *   Do not use this macro more than once in a file (even with different names).
+ *   Do not put a semicolon after the macro (see example below).
+ *
+ * ex:
+ *
+ * #include <ilc/test.h>
+ *
+ * TEST_SUITE("my awesome tests")
+ */
 #define TEST_SUITE(suite_name) \
 static void __ilc_test_main__(Test *tests, size_t ntests) { \
     TestSuite *suite = create_test_suite(suite_name); \
