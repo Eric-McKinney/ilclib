@@ -2,7 +2,7 @@
 #include <ilc/test.h>
 #include <ilc/dynarray.h>
 
-TEST_SUITE(dynarray tests)
+TEST_SUITE("dynarray tests")
 
 typedef struct {
     size_t item_size;

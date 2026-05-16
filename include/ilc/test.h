@@ -147,8 +147,9 @@ void handle_cmdline_args(int argc, char **argv) {
     size_t ntests = sizeof(tests) / sizeof(Test); \
     __ilc_test_main__(tests, ntests); \
 
-#define TEST_SUITE(suite_name) static void __ilc_test_main__(Test *tests, size_t ntests) { \
-    TestSuite *suite = create_test_suite(#suite_name); \
+#define TEST_SUITE(suite_name) \
+static void __ilc_test_main__(Test *tests, size_t ntests) { \
+    TestSuite *suite = create_test_suite(suite_name); \
     size_t i; \
     for (i = 0; i < ntests; i++) { \
         suite_add_test(suite, tests[i].name, tests[i].run, tests[i].input); \
