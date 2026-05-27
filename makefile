@@ -43,6 +43,12 @@ $(TEST_BIN)/dynarray_example: $(OBJ)/dynarray_example.o $(OBJ)/libdynarray.so
 $(OBJ)/dynarray_example.o: $(TEST_SRC)/dynarray_example.c $(INCLUDE)/ilc/dynarray.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+$(TEST_BIN)/dynarray_tests: $(OBJ)/dynarray_tests.o $(OBJ)/libdynarray.so
+	$(CC) $(LDFLAGS) -o $@ $< -ldynarray -ltest
+
+$(OBJ)/dynarray_tests.o: $(TEST_SRC)/dynarray_tests.c $(INCLUDE)/ilc/dynarray.h $(INCLUDE)/ilc/test.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 $(OBJ):
 	mkdir -p $(OBJ)
 
