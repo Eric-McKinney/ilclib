@@ -128,3 +128,64 @@ void run_test_suite(TestSuite *suite, int verbose) {
 
     printf("\n" COLOR_TEXT(BLUE_HL, "%s") ": %d of %d tests passed\n", suite->name, num_passed, suite->num_tests);
 }
+
+static __inline__ void print_indent(int indent, int indent_level) {
+    for (int i = 0; i < indent * indent_level; i++) {
+        printf(" ");
+    }
+}
+
+int test_mem_equal(const void *expected, const void *result, size_t nbytes,
+                   const char *fail_msg, void (*print_fn)(const void *),
+                   int verbose, int indent, int indent_level) {
+    if (memcmp(expected, result, nbytes) == 0) {
+        return 1;
+    }
+
+    if (verbose) {
+        print_indent(indent, indent_level);
+
+        if (fail_msg != NULL) {
+            printf("%s\n", fail_msg);
+        }
+
+        if (print_fn != NULL) {
+            print_indent(indent, indent_level + 1);
+            printf("expected:\n");
+            print_indent(indent, indent_level + 2);
+            print_fn(expected);
+            print_indent(indent, indent_level + 1);
+            printf("but got:\n");
+            print_indent(indent, indent_level + 2);
+            print_fn(result);
+        }
+    }
+
+    return 0;
+}
+
+int test_errno_equal(int expected_errno, int actual_errno, int verbose,
+                     int indent, int indent_level) {
+    if (expected_errno == actual_errno) {
+        return 1;
+    }
+
+    if (verbose) {
+        print_indent(indent, indent_level);
+        printf(COLOR_TEXT(RED, "incorrect errno") ": ");
+        printf("(expected: %d", expected_errno);
+        printf(", but got: %d)\n", actual_errno);
+    }
+
+    return 0;
+}
+
+int test_condition(int condition, const char *fail_msg, int verbose, int indent,
+                   int indent_level) {
+    if (!condition && verbose) {
+        print_indent(indent, indent_level);
+        printf("%s\n", fail_msg);
+    }
+
+    return condition;
+}
