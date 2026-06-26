@@ -169,17 +169,22 @@ int test_mem_equal(const void *expected, const void *result, size_t nbytes,
     return 0;
 }
 
-int test_errno_equal(int expected_errno, int actual_errno, int verbose,
-                     int indent, int indent_level) {
-    if (expected_errno == actual_errno) {
+int test_int_equal(int expected, int actual, const char *fail_msg, int verbose,
+                   int indent, int indent_level) {
+    if (expected == actual) {
         return 1;
     }
 
     if (verbose) {
         print_indent(indent, indent_level);
-        printf(COLOR_TEXT(RED, "incorrect errno") ": ");
-        printf("(expected: %d", expected_errno);
-        printf(", but got: %d)\n", actual_errno);
+        printf("%s", fail_msg);
+
+        if (fail_msg != NULL && strcmp(fail_msg, "") != 0) {
+            printf(" ");
+        }
+
+        printf("(expected: %d", expected);
+        printf(", but got: %d)\n", actual);
     }
 
     return 0;
