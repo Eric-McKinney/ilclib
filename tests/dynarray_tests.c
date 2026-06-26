@@ -13,8 +13,10 @@ typedef struct {
 
 static int append_test(const void *input) {
     DArrTestInput *args = (DArrTestInput *) input;
-    int test_result = SUCCESS;
+    int test_result = 1;
     errno = 0;
+
+    INDENT_LEVEL++;
 
     DynArray *da = create_dynarray(args->item_size);
     if (da == NULL) {
@@ -30,46 +32,28 @@ static int append_test(const void *input) {
         int errno_val = errno;
         size_t len = dynarray_length(da);
 
-        int ret_val_ok = ret_val == args->expected_errno;
-        int errno_ok = errno_val == args->expected_errno;
-        int length_ok = (ret_val == 0) ? (len == (size_t) i + 1) : (len == (size_t) i);
+        if (VERBOSE) {
+            printf("    dynarray_append(da, item #%d)\n", i);
+        }
+
+        int ret_val_ok = INT_EQUAL(args->expected_errno, ret_val,
+                COLOR_TEXT(RED, "incorrect return value"));
+        int errno_ok = ERRNO_EQUAL(args->expected_errno, errno_val);
+        int length_ok = CONDITION(ret_val != 0 || len == (size_t) i + 1,
+                COLOR_TEXT(RED, "length didn't increase")
+                " after successful append");
         int item_ok = (ret_val == 0) ?
-            memcmp(dynarray_item_at(da, i), item, args->item_size) == 0
+            MEM_EQUAL(item, dynarray_item_at(da, i), args->item_size,
+                    COLOR_TEXT(RED, "appended item is not equal to i-th item"), NULL)
             : 1;
-        int append_ok = ret_val_ok
-                     && errno_ok
-                     && length_ok
-                     && item_ok;
 
-        if (VERBOSE && !append_ok) {
-            printf("    dynarray_append(da, item #%d):\n", i);
-
-            if (!ret_val_ok) {
-                printf("        dynarray_append " COLOR_TEXT(RED, "returned %d") "\n",
-                       ret_val);
-            }
-            if (!errno_ok) {
-                printf("        dynarray_append " COLOR_TEXT(RED, "set errno to %d") "\n",
-                       errno_val);
-            }
-            if (!length_ok) {
-                printf("        dynarray_length " COLOR_TEXT(RED, "returned %lu")
-                       " after append #%d\n", len, i + 1);
-            }
-            if (!item_ok) {
-                printf("        dynarray_item_at "
-                       COLOR_TEXT(RED, "differs from actual item") "\n");
-            }
-        }
-
-        if (!append_ok) {
-            test_result = FAILURE;
-            break;
-        }
+        test_result = test_result && ret_val_ok && errno_ok && length_ok && item_ok;
     }
 
+    INDENT_LEVEL--;
+
     free_dynarray(da);
-    return test_result;
+    return test_result ? SUCCESS : FAILURE;
 }
 
 int main(int argc, char **argv) {
