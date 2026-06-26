@@ -159,6 +159,11 @@ int test_mem_equal(const void *expected, const void *result, size_t nbytes,
             print_indent(indent, indent_level + 2);
             print_fn(result);
         }
+
+        if (fail_msg == NULL && print_fn == NULL) {
+            printf("memory regions at %p (expected) and %p (actual) of %lu "
+                   "bytes differ\n", expected, result, nbytes);
+        }
     }
 
     return 0;
